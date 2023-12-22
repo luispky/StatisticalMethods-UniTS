@@ -1,0 +1,16 @@
+---
+title: "GroupA_HW4"
+author: "A. Gottardi, Edoardo XYZ, Alessandro UVW, L.F. Palacios Flores"
+output: 
+  html_document:
+    toc: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# "Doubt the data until the data leave no room for doubt." - Henri Poincaré
