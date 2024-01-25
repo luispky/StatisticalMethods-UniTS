@@ -53,6 +53,7 @@ df %>%
   head()
 ### BARPLOTS
 names = colnames(df)[! (colnames(df) %in% c("id", "Age", "Region_Code", "Annual_Premium", "Policy_Sales_Channel", "Vintage")) ]
+names2 <- colnames(df)[(colnames(df) %in% c("Age", "Region_Code", "Policy_Sales_Channel", "Vintage")) ]
 # function to create the simplest 
 simple_bars <- function(data, names){
   plot_list <- list()
@@ -72,8 +73,8 @@ simple_bars <- function(data, names){
   }
   return(plot_list)
 }
-plots <- simple_bars(df, names)
-grid.arrange(grobs = plots, nrow = 2, ncol=3)
+plots <- simple_bars(df, names2)
+grid.arrange(grobs = plots, nrow = 2, ncol=2)
 
 
 gender_bar <- ggplot(df, aes(x = Gender, fill = "Blue")) +
@@ -87,22 +88,32 @@ colnames(df)
 
 ### BARPLOTS with predictors
 
-plot_list <- list()
-for (col_name in names) {
-  # Create a bar plot for the current column
-  bar_plot_resp <- ggplot(df, aes(x = !!sym(col_name), fill = as.factor(Response))) +
-    geom_bar(position = "dodge") +
-    labs(title = paste("Barplot of ", col_name, "vs. Response"),
-         x = col_name,
-         y = "",
-         fill = "Response") +
-    scale_x_discrete(labels = function(x) as.character(x)) +
-    scale_fill_manual(values = c("0" = "aquamarine", "1" = "coral"))
-  
-  # Append the bar plot to the list
-  plot_list[[col_name]] <- bar_plot_resp
+names <- colnames(df)[! (colnames(df) %in% c("Response", "id", "Age", "Region_Code", "Annual_Premium", "Policy_Sales_Channel", "Vintage")) ]
+
+resp_bars <- function(data, names) {
+  plot_list <- list()
+  for (col_name in names) {
+    # Create a bar plot for the current column
+    bar_plot_resp <- ggplot(data, aes(x = !!sym(col_name), fill = as.factor(Response))) +
+      geom_bar(position = "dodge") +
+      labs(#title = paste("Barplot of ", col_name, "vs. Response"),
+           x = col_name,
+           y = "",
+           fill = "Response") +
+      scale_x_discrete(labels = function(x) as.character(x)) +
+      scale_fill_manual(values = c("0" = "gray50", "1" = "coral"))
+    
+    # Append the bar plot to the list
+    plot_list[[col_name]] <- bar_plot_resp
+  }
+  return(plot_list)
 }
-grid.arrange(grobs = plot_list, nrow = 4, ncol=3)
+
+plot_list <- resp_bars(df, names)
+
+# Display the plots in a grid
+grid.arrange(grobs = plot_list, nrow = 2, ncol = 3)
+
 
 
 ggplot(df, aes(x = Annual_Premium, fill = as.factor(Response))) +
