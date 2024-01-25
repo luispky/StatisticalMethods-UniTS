@@ -1,6 +1,6 @@
 ---
-title: "GroupA_HW4"
-author: "A. Gottardi, Edoardo XYZ, Alessandro UVW, L.F. Palacios Flores"
+title: "Report"
+author: "A. Gottardi, E. Corrolezzis, A. XYZ, L.F. Palacios Flores"
 output: 
   html_document:
     toc: true
@@ -11,127 +11,14 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-if(!require(ellipse)) install.packages("ellipse")
-library(ellipse)
-if(!require(ggcorrplot)) install.packages("ggcorrplot")
-library(ggcorrplot)
-if(!require(PerformanceAnalytics)) install.packages("PerformanceAnalytics")
-library(PerformanceAnalytics)
+# Check if libraries are already installed or install them if necessary
 if(!require(skimr)) install.packages("skimr")
 library(skimr)
+if(!require(ggplot2)) install.packages("ggplot2")
+library(ggplot2)
 if(!require(corrplot)) install.packages("corrplot")
 library(corrplot)
-library(ggplot2)
 ```
 
 # "Doubt the data until the data leave no room for doubt." - Henri Poincaré
 
-
-Load the data and see print descriptive statistics
-
-```{r}
-train_df <- read.csv("train.csv")
-
-head(train_df)
-skim(train_df)
-summary(train_df)
-```
-
-* id:	Unique ID for the customer
-* Gender:	Gender of the customer
-* Age:	Age of the customer
-* Driving_License:	0 for Customer does not have DL, 1 for Customer already has DL
-* Region_Code:	Unique code for the region of the customer
-* Previously_Insured:	1 : Customer already has Vehicle Insurance, 0 : Customer doesn't have Vehicle Insurance. PROBABLY NEEDS TO BE REMOVED. A customer is probably going to renew his insurance contract.
-* Vehicle_Age:	Age of the Vehicle
-* Vehicle_Damage:	1 : Customer got his/her vehicle damaged in the past. 0 : Customer didn't get his/her vehicle damaged in the past.
-* Annual_Premium:	The amount customer needs to pay as premium in the year
-* Policy_Sales_Channel:	Anonymized Code for the channel of outreaching to the customer ie. Different Agents, Over Mail, Over Phone, In Person, etc.
-* Vintage:	Number of Days, Customer has been associated with the company
-* Response:	1 : Customer is interested, 0 : Customer is not interested
-
-Transform the data into a proper data types to work with them. 
-
-```{r}
-data <- read.csv("train.csv", stringsAsFactors = T)
-columns_to_convert <- c("Driving_License", "Region_Code", "Previously_Insured", "Policy_Sales_Channel", "Response")
-data[columns_to_convert] <- lapply(data[columns_to_convert], as.factor)
-```
-
-Plot the distribution of the categorical variables
-
-```{r}
-factor_columns <- sapply(data, is.factor)
-factor_variable_names <- names(factor_columns[factor_columns])
-par(mfrow = c(1, length(factor_variable_names)))  # Set up a multi-panel plot
-for (col in factor_variable_names) {
-  barplot(table(data[[col]]), main = col, xlab = col, ylab = "Frequency")
-}
-```
-
-Plot the distribution of the numerical variables
-
-```{r}
-numeric_columns <- sapply(data, is.numeric)
-numeric_variable_names <- names(numeric_columns[numeric_columns])
-par(mfrow = c(1, length(numeric_variable_names)))  # Set up a multi-panel plot
-for (col in numeric_variable_names) {
-  hist(data[[col]], main = col, xlab = col, ylab = "Frequency")
-}
-```
-
-Plot the correlation of the numerical variables
-
-```{r}
-corrplot(
-  cor(data[, numeric_columns]),  # Calculate correlation matrix, remove missing values
-  method = "color",  # Specify method for plotting correlations (using colors)
-  type = "upper",    # Specify type of correlation plot (upper triangular)
-  order = "hclust",  # Specify order of rows and columns (hierarchical clustering)
-  tl.col = "black",  # Set color of text labels (axis labels) to black
-  tl.srt = 90,       # Set rotation angle for text labels (orthogonal to the axis)
-  addCoef.col = "black",  # Set color of correlation coefficients to black
-  tl.cex = 1,      # Set text label character expansion (font size)
-  number.cex = 1  # Set text label character expansion for correlation values
-)
-```
-
-Compute independence test of categorical variables using the Pearson's Chi-Squared test.
-
-```{r, warning=FALSE}
-# Dataframe to store values
-chi_squared_results <- data.frame(
-  Variable1 = c(),
-  Variable2 = c(),
-  p_value = c()
-)
-
-k <- 2
-for (i in factor_variable_names[1:7]){
-  for (j in factor_variable_names[k:8]){
-    # Extract the variables for the chi-squared test
-    var1 <- data[, i]
-    var2 <- data[, j]
-    
-    # Create a contingency table
-    contingency_table <- table(var1, var2)
-    
-    # Perform the chi-squared test
-    result <- chisq.test(contingency_table)
-
-    # Add new row
-    new_row <- data.frame(
-      Variable1 = i,
-      Variable2 = j,
-      p_value = result$p.value
-    )    
-    # Store the result in the list
-    chi_squared_results <- rbind(chi_squared_results, new_row)
-  }
-  k <- k + 1
-}
-# Print the results
-# print(chi_squared_results)
-max_row <- chi_squared_results[which.max(chi_squared_results[['p_value']]), ]
-print(max_row)
-```
