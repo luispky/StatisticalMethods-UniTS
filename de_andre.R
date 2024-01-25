@@ -2,11 +2,11 @@ getwd()
 setwd("Desktop/uni/statistical_methods/final_project/stats_project")
 
 library(ggplot2); library(car); library(mgcv); library(skimr); library(viridis)
-library(psych); library(gridExtra)
+library(psych); library(gridExtra); library(dplyr)
 
 install.packages("viridis")
 
-df <- read.csv('train.csv')
+df <- read.csv('datasets/train.csv')
 last_col <- ncol(df)
 
 # Reorder the columns
@@ -21,7 +21,7 @@ describe(df) # asterisk means categorical vars converted to num for description
 barplot(table(df$Response))
 table(df$Driving_License)
 table(df$Previously_Insured)
-
+summary(df)
 #######################################################################à
 
 ### gender -> binary
@@ -116,6 +116,13 @@ grid.arrange(grobs = plot_list, nrow = 2, ncol = 3)
 
 
 
+par(mfrow = c(1, 1))
+barplot(prop.table(table(df$Response, df$Age), margin = 1),
+        beside = TRUE, legend.text = c("No", "Yes"), xlab = "Education (years)")
+
+
+
+
 ggplot(df, aes(x = Annual_Premium, fill = as.factor(Response))) +
   geom_bar(position = "dodge") +
   labs(title = "Barplot of Gender vs. Response",
@@ -131,6 +138,24 @@ ggplot(df, aes(x = Gender, y = Response, fill = "Blue")) +
        x = "Gender",
        y = "Response") +
   scale_fill_manual(values = c("Blue" = "lightblue"))
+
+
+library(dplyr)
+
+percentage_male <- mean(df$Response[df$Gender == "Male"]) * 100
+percentage_female <- mean(df$Response[df$Gender == "Female"]) * 100
+
+# Create a data frame for the bar plot
+percentage_data <- data.frame(Gender = c("Male", "Female"),
+                              Percentage = c(percentage_male, percentage_female))
+
+# Create the bar plot
+ggplot(percentage_data, aes(x = Gender, y = Percentage, fill = Gender)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Percentage of Response by Gender",
+       x = "Gender",
+       y = "Percentage") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1))
 
 ## Binary trasformations
 df$GenderB <- ifelse(df$Gender=="Female",1,0)
@@ -202,3 +227,9 @@ ggplot(df=df, aes(x = Age, fill = factor(Response))) +
   labs(title = "Barplot of Binary Variable",
        x = "Response",
        y = "Count")
+
+model.log <- glm(df$Response ~., data=df, family = binomial(link = "logit"))
+summary(model.log)
+model.log2 <- glm(df$Response ~.-id-Region_Code-Vintage, data=df, family = binomial(link = "logit"))
+summary(model.log2)
+AIC(model.log, model.log2)
