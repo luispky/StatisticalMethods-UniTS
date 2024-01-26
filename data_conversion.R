@@ -13,7 +13,7 @@ columns_to_convert <- c("Driving_License", "Region_Code",
 train_df[columns_to_convert] <- lapply(train_df[columns_to_convert], as.factor)
 
 # Drop the 'id' column
-train_df <- subset(train_df, select = -id)
+# train_df <- subset(train_df, select = -id)
 
 # Save as .RData to have consistency when working with the converted datasets later
 save(train_df, file = paste(datasets_dir, "train_df.RData", sep = '/'))
@@ -27,6 +27,6 @@ columns_to_convert <- c("Driving_License", "Region_Code",
                         "Previously_Insured", "Policy_Sales_Channel")
 test_df[columns_to_convert] <- lapply(test_df[columns_to_convert], as.factor)
 
-test_df <- subset(test_df, select = -id)
+# test_df <- subset(test_df, select = -id)
 
 save(test_df, file = paste(datasets_dir, "test_df.RData", sep = '/'))
