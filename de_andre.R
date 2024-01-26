@@ -1,12 +1,13 @@
 getwd()
 setwd("Desktop/uni/statistical_methods/final_project/stats_project")
 
+##### Libraries and preliminaries #####
+setwd("Desktop/uni/statistical_methods/final_project/stats_project")
+
 library(ggplot2); library(car); library(mgcv); library(skimr); library(viridis)
-library(psych); library(gridExtra); library(dplyr)
+library(psych); library(gridExtra); library(dplyr); library(skimr)
 
-install.packages("viridis")
-
-df <- read.csv('datasets/train.csv')
+df <- read.csv('datasets/train.csv') 
 last_col <- ncol(df)
 
 # Reorder the columns
@@ -16,25 +17,39 @@ df <- df[, new_order]
 ###### Data Exploration ######
 #View(df)
 #dim(df)---> dimension=381109x12
-describe(df) # asterisk means categorical vars converted to num for description
+#describe(df) # asterisk means categorical vars converted to num for description
 #head(df)
+skim(df)
+summary(df)
+
+### gender               -> binary
+### age                  -> numerical
+### driving license      -> binary
+### region code          -> classification? 52
+### previously insured   -> binary 
+### vehicle age          -> categorical
+### vehicle damage       -> binary
+### annual premium       -> numerical
+### policy sales channel -> categorical
+### vintage              -> numerical
+### response             -> binary
+
+# shall we convert to numbers?
+df$Gender <- as.factor(df$Gender)
+df$Driving_License <- as.factor(df$Driving_License)
+df$Region_Code <- as.factor(df$Region_Code)
+df$Previously_Insured <- as.factor(df$Previously_Insured)
+df$Vehicle_Age <- as.factor(df$Vehicle_Age)
+df$Vehicle_Damage <- as.factor(df$Vehicle_Damage)
+df$Policy_Sales_Channel <- as.factor(df$Policy_Sales_Channel)
+df$Response <- as.factor(df$Response)
+
+
+#######################################################################à
+
 barplot(table(df$Response))
 table(df$Driving_License)
 table(df$Previously_Insured)
-summary(df)
-#######################################################################à
-
-### gender -> binary
-### age -> numerical
-### driving license -> binary
-### region code -> classification? 52
-### previously insured -> binary 
-### veichle age -> categorical
-### vehicle damage -> binary
-### annual premium -> numerical
-### policy sales channel -> categorical
-### vintage -> numerical (count?)
-### response -> binary
 
 
 #gender_bar <- ggplot(df, aes(x = Gender, fill = "Blue")) +
@@ -44,13 +59,12 @@ summary(df)
 #       y = "Count") +
 #  scale_fill_manual(values = c("Blue" = "lightblue"))
 
-df$Annual_Premium <- log(df$Annual_Premium)
 
-library(dplyr) # from version 1.0.0 
+plot(df$Age, df$Annual_Premium)
+prop.table(table(df$Response, df$Vehicle_Age), margin=1)
 
-df %>%
-  relocate(Response) %>%
-  head()
+
+mosaicplot(table(df$Response, df$Vehicle_Age), margin=1)
 ### BARPLOTS
 names = colnames(df)[! (colnames(df) %in% c("id", "Age", "Region_Code", "Annual_Premium", "Policy_Sales_Channel", "Vintage")) ]
 names2 <- colnames(df)[(colnames(df) %in% c("Age", "Region_Code", "Policy_Sales_Channel", "Vintage")) ]
@@ -115,13 +129,17 @@ plot_list <- resp_bars(df, names)
 grid.arrange(grobs = plot_list, nrow = 2, ncol = 3)
 
 
-
-par(mfrow = c(1, 1))
+## try different barplots
+fill_patterns <- c(1, 40)
+par(mfrow = c(1, 2))
 barplot(prop.table(table(df$Response, df$Age), margin = 1),
-        beside = TRUE, legend.text = c("No", "Yes"), xlab = "Education (years)")
+        beside = TRUE, legend.text = c("No", "Yes"), xlab = "Age (years)", col = c("gray90", "blue"), density = fill_patterns)
+barplot(prop.table(table(df$Response, df$Age), margin = 2), , col = c("gray90", "blue"), density = fill_patterns)
+        beside = TRUE, legend.text = c("No", "Yes"), xlab = "Age (years)")
 
 
-
+# histograms for numerical
+hist(df$Age)
 
 ggplot(df, aes(x = Annual_Premium, fill = as.factor(Response))) +
   geom_bar(position = "dodge") +
@@ -227,6 +245,10 @@ ggplot(df=df, aes(x = Age, fill = factor(Response))) +
   labs(title = "Barplot of Binary Variable",
        x = "Response",
        y = "Count")
+
+
+
+###### Models ######
 
 model.log <- glm(df$Response ~., data=df, family = binomial(link = "logit"))
 summary(model.log)
