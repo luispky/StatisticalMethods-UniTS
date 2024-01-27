@@ -266,7 +266,6 @@ anova(gam_all_no_id_vintage_lasso)
 
 
 # try to use generalized vif 
-# 
 
 # splines and logarithm for Age, Annual_Premium and channels + region reduced | NO channels, id and vintage | RIDGE penalization----
 gam_all_no_id_vintage_ridge <- gam(Response ~ Gender + Channels_Reduced + Driving_License +
@@ -275,3 +274,6 @@ gam_all_no_id_vintage_ridge <- gam(Response ~ Gender + Channels_Reduced + Drivin
                              data = data, family = binomial(), 
                              method = "REML", select.method = "ridge", optimizer = "efs") # RIDGE
 summary(gam_all_no_id_vintage_ridge)
+
+
+# splines and logarithm for Age, Annual_Premium and channels + region reduced | NO channels, id and vintage | LASSO penalization----

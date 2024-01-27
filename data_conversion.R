@@ -124,6 +124,7 @@ save(test_reduced, file = paste(datasets_dir, "test_reduced.RData", sep = '/'))
 
 
 # NOW WE ARE ABLE TO LOAD THE DATASETS IN THE FOLLOWING WAY
+# datasets_dir <- paste(dirname(rstudioapi::getActiveDocumentContext()$path),"datasets", sep = "/")
 # load(paste(datasets_dir, "train_reduced.RData", sep="/"))
 # WE CAN USE THE DATASET WITH THE NAME IT ALREADY HAS AND WE CAN USE IT LIKE THIS:
 # skim(train_reduced)
