@@ -1,5 +1,7 @@
 # LIBRARIES ------------------------------------------------------------------------------------------------
 if(!require(ggplot2)) install.packages("ggplot2")
+if(!require(ROSE)) install.packages("ROSE")
+library(ROSE)
 library(ggplot2)
 library(mgcv)
 library(dplyr)
@@ -277,3 +279,17 @@ summary(gam_all_no_id_vintage_ridge)
 
 
 # splines and logarithm for Age, Annual_Premium and channels + region reduced | NO channels, id and vintage | LASSO penalization----
+
+load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
+data <- get("train_reduced")
+
+# Assuming 'target' is the binary target variable
+data_oversampled_balanced <- ROSE(Response ~ ., data = data, seed = 42)$data
+
+gam_reduced_ridge <- gam(Response ~ Gender + Driving_License + Previously_Insured + 
+                        Vehicle_Damage + Channels_Reduced + s(log(Age)) +
+                        s(log(Annual_Premium)) + Region_Reduced + Vehicle_Age, 
+                        data = data_oversampled_balanced, family = binomial(), 
+                        optimizer = 'efs', select = TRUE)
+
+help(gam)
