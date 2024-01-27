@@ -7,9 +7,12 @@ setwd("Desktop/uni/statistical_methods/final_project/stats_project")
 library(ggplot2); library(car); library(mgcv); library(skimr); library(viridis)
 library(psych); library(gridExtra); library(dplyr); library(skimr)
 
-df <- read.csv('datasets/train.csv') 
-last_col <- ncol(df)
+hist(df$Policy_Sales_Channel)
 
+df.raw <- df
+df <- read.csv('datasets/train.csv')
+df_test <- read.csv('datasets/test.csv')
+last_col <- ncol(df)
 # Reorder the columns
 new_order <- c(last_col, 1:(last_col - 1))
 df <- df[, new_order]
@@ -33,7 +36,7 @@ summary(df)
 ### policy sales channel -> categorical
 ### vintage              -> numerical
 ### response             -> binary
-
+df.raw = df
 # shall we convert to numbers?
 df$Gender <- as.factor(df$Gender)
 df$Driving_License <- as.factor(df$Driving_License)
@@ -45,7 +48,7 @@ df$Policy_Sales_Channel <- as.factor(df$Policy_Sales_Channel)
 df$Response <- as.factor(df$Response)
 
 
-#######################################################################à
+
 
 barplot(table(df$Response))
 table(df$Driving_License)
@@ -132,9 +135,9 @@ grid.arrange(grobs = plot_list, nrow = 2, ncol = 3)
 ## try different barplots
 fill_patterns <- c(1, 40)
 par(mfrow = c(1, 2))
-barplot(prop.table(table(df$Response, df$Age), margin = 1),
+barplot(prop.table(table(df$Response, df$Policy_Sales_Channel), margin = 1),
         beside = TRUE, legend.text = c("No", "Yes"), xlab = "Age (years)", col = c("gray90", "blue"), density = fill_patterns)
-barplot(prop.table(table(df$Response, df$Age), margin = 2), , col = c("gray90", "blue"), density = fill_patterns)
+barplot(prop.table(table(df$Response, df$Region_Code), margin = 2), , col = c("gray90", "blue"), density = fill_patterns)
         beside = TRUE, legend.text = c("No", "Yes"), xlab = "Age (years)")
 
 
@@ -248,10 +251,113 @@ ggplot(df=df, aes(x = Age, fill = factor(Response))) +
 
 
 
-###### Models ######
+##### MODELS #####
+model.glm.raw <- glm(df.raw$Response ~., data=df.raw, family = binomial(link = "logit"))
+model.glm.log <- glm(df.raw$Response ~.-Annual_Premium+I(Annual_Premium^-1), data=df.raw, family = binomial(link = "logit"))
+summary(model.glm.log)
+model.glm.sq <- glm(df.raw$Response ~.-Age+I(Age^2), data=df.raw, family = binomial(link = "logit"))
+AIC(model.glm, model.glm.log, model.glm.sq)
 
-model.log <- glm(df$Response ~., data=df, family = binomial(link = "logit"))
+model.glm <- glm(df$Response ~., data=df, family = binomial(link = "logit"))
+summary(model.glm)
+par(mfrow=c(2,2))
+plot(model.glm.log)
+
+# cooks distance outliers analysis
+cooks.distance <- cooks.distance(model.glm)
+plot(cooks.distance, pch="*", main="Cook's distance")
+abline(h=0.001, col="red") # Points above this line are influential
+
+
+
+model.glm <- glm(Response ~. -Annual_Premium + I(1/Annual_Premium), data=df, family = binomial(link = "logit"))
 summary(model.log)
-model.log2 <- glm(df$Response ~.-id-Region_Code-Vintage, data=df, family = binomial(link = "logit"))
-summary(model.log2)
-AIC(model.log, model.log2)
+pchisq(model.log$null.deviance - model.log$deviance, model.log$df.null-model.log$df.residual, lower.tail=FALSE)
+plot(model.glm)
+
+
+# residual analysis
+
+
+#### RESIDUAL ANALYSIS####
+
+residuals_values <- residuals(model.glm, type = "response")
+df$residuals <- residuals_values
+hist(df$residuals)
+
+
+# Subset the dataframe where residuals are greater than 10
+k = 0.5
+dfr <- df[abs(df$residuals) > k, ]
+dim(dfr)
+hist(dfr$Annual_Premium^-1)
+fill_patterns <- c(1, 40)
+barplot(prop.table(table(dfr$Response, dfr$Age), margin = 2), , col = c("gray90", "blue"), density = fill_patterns)
+beside = TRUE, legend.text = c("No", "Yes"), xlab = "Age (years)")
+
+dfr2 <- df[abs(df$residuals) < k, ]
+dim(dfr)
+hist(dfr2$Annual_Premium^-1)
+fill_patterns <- c(1, 40)
+barplot(prop.table(table(dfr2$Response, dfr2$Age), margin = 2), , col = c("gray90", "blue"), density = fill_patterns)
+beside = TRUE, legend.text = c("No", "Yes"), xlab = "Age (years)")
+
+
+bar_plot_resp <- ggplot(data=dfr, aes(x = Gender, fill = as.factor(Response))) +
+  geom_bar(position = "dodge") +
+  labs(#title = paste("Barplot of ", col_name, "vs. Response"),
+    x = "name",
+    y = "",
+    fill = "Response") +
+  scale_x_discrete(labels = function(x) as.character(x)) +
+  scale_fill_manual(values = c("0" = "gray50", "1" = "coral"))
+bar_plot_resp
+
+
+AIC(model.log.raw, model.log)
+
+model.log.red <- glm(df$Response ~.-id, data=df, family = binomial(link = "logit"))
+AIC(model.log.raw, model.log, model.log.red)
+summary(model.log.red)
+
+hist(log(df$Age))
+
+
+##### RIDGE/LASSO REGRESSION #####
+library(glmnet)
+n <- dim(df)[1]
+p <- dim(df)[2]
+dim(df)
+X <- as.matrix(df[, 2:12])
+y <- df[, p]
+fit_ridge <- glmnet(X, y, alpha=0)
+round(t(coef(fit_ridge, s=0.1)), 4)
+plot(fit_ridge)
+
+##### LUIS ANALYSIS ######
+
+current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
+datasets_dir <- paste(current_path,"datasets", sep = "/")
+
+# Now that the dataframe is stored in an .RData format we can simply load it and the 
+# it will have the same name as the filename
+load(paste(datasets_dir, "train_df.RData", sep = "/"))
+
+# In case we may want to do some processing to the test dataset later I'll change the name to the dataframe
+data <- get("train_df")
+skim(data)
+library(dplyr)
+data_summary <- data %>%
+  group_by(Region_Code, Response) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  mutate(Percentage = Count / sum(Count)) %>%
+  arrange(desc(Percentage)) %>%
+  head(10)
+data_summary
+str(data_summary)
+
+
+summary(df)
+library(brglm)
+mod <- brglm(Response~., data=df, family=binomial)
+summary(mod)
