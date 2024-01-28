@@ -1,6 +1,8 @@
 # LIBRARIES ------------------------------------------------------------------------------------------------
 if(!require(ggplot2)) install.packages("ggplot2")
 if(!require(ROSE)) install.packages("ROSE")
+if(!require(mgcViz)) install.packages("mgcViz")
+library(mgcViz)
 library(ROSE)
 library(ggplot2)
 library(mgcv)
@@ -269,27 +271,78 @@ anova(gam_all_no_id_vintage_lasso)
 
 # try to use generalized vif 
 
-# splines and logarithm for Age, Annual_Premium and channels + region reduced | NO channels, id and vintage | RIDGE penalization----
-gam_all_no_id_vintage_ridge <- gam(Response ~ Gender + Channels_Reduced + Driving_License +
-                             Previously_Insured + Vehicle_Damage + s(log(Age)) +
-                             s(log(Annual_Premium)) + Region_Reduced + Vehicle_Age,
-                             data = data, family = binomial(), 
-                             method = "REML", select.method = "ridge", optimizer = "efs") # RIDGE
-summary(gam_all_no_id_vintage_ridge)
-
-
-# splines and logarithm for Age, Annual_Premium and channels + region reduced | NO channels, id and vintage | LASSO penalization----
 
 load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
 data <- get("train_reduced")
 
+# splines and logarithm for Age, Annual_Premium and channels + region reduced | NO channels, id and vintage | RIDGE penalization----
+gam_all_no_id_vintage_ridge <- gam(Response ~ Gender + Driving_License + Previously_Insured + 
+                                  Vehicle_Damage + Channels_Reduced + s(log(Age)) +
+                                  s(Annual_Premium) + Region_Reduced + Vehicle_Age,
+                                  data = data, family = binomial(), 
+                                  optimizer = "efs", select = TRUE)
+summary(gam_all_no_id_vintage_ridge)
+
+
+# splines for Age (logarithm), Annual_Premium and channels + region reduced | NO channels, id and vintage | oversample | penalization----
+
 # Assuming 'target' is the binary target variable
 data_oversampled_balanced <- ROSE(Response ~ ., data = data, seed = 42)$data
 
-gam_reduced_ridge <- gam(Response ~ Gender + Driving_License + Previously_Insured + 
+gam_reduced_oversampled <- gam(Response ~ Gender + Driving_License + Previously_Insured + 
                         Vehicle_Damage + Channels_Reduced + s(log(Age)) +
-                        s(log(Annual_Premium)) + Region_Reduced + Vehicle_Age, 
+                        s(Annual_Premium) + Region_Reduced + Vehicle_Age, 
                         data = data_oversampled_balanced, family = binomial(), 
                         optimizer = 'efs', select = TRUE)
 
-help(gam)
+# help(gam)
+summary(gam_reduced_oversampled)
+
+# splines for Age (logarithm), Annual_Premium and channels + region reduced | NO channels, id and vintage | oversample + undersample | penalization----
+
+data_balanced_sampled <- data_oversampled_balanced[sample(nrow(data_oversampled_balanced), 100000, replace = FALSE), ]
+
+gam_sampled <- gam(Response ~ Gender + Driving_License + Previously_Insured + 
+                        Vehicle_Damage + Channels_Reduced + s(log(Age)) +
+                        s(Annual_Premium) + Region_Reduced + Vehicle_Age, 
+                        data = data_balanced_sampled, family = binomial(), 
+                        optimizer = 'efs', select = TRUE)
+
+# help(gam)
+summary(gam_sampled)
+
+plot(gam_sampled, pages=1)
+plot(gam_sampled, pages=1, scheme=1, unconditional=TRUE)
+plot(gam_sampled, pages=1, scheme=2)
+plot(gam_sampled, pages=1, residuals=TRUE)
+plot(gam_sampled, pages=2, residuals=TRUE)
+plot(gam_sampled, pages=1,seWithMean=TRUE)
+
+# What does the p-value mean here?
+gam.check(gam_sampled)
+
+
+gam_sampledViz <- getViz(gam_sampled)
+print(plot(gam_sampledViz, allTerms = T), pages = 1)
+plot(gam_sampledViz)
+
+pl <- plot(gam_sampledViz, allTerms = T) + l_points() + l_fitLine(linetype = 3) + l_fitContour() + 
+      l_ciLine(colour = 2) + l_ciBar() + l_fitPoints(size = 1, col = 2) + theme_get() + labs(title = NULL) #+ 
+      # l_dens(type = "cond")
+print(pl, pages = 1)
+
+# What does the p-value mean here?
+check(gam_sampledViz)
+
+gam_sampledViz <- getViz(gam_sampled, nsim=100)
+gridPrint(check1D(gam_sampledViz, "log(Age)") + l_gridCheck1D(gridFun = sd, showReps = TRUE), 
+          check1D(gam_sampledViz, "Annual_Premium") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Gender") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Driving_License") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Previously_Insured") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Vehicle_Damage") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Channels_Reduced") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Region_Reduced") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Vehicle_Age") + l_gridCheck1D(gridFun = sd, showReps = TRUE)
+)
+          #  ncol = 2)
