@@ -174,7 +174,7 @@ data_summary
 
 train_reduced <- data
 
-# train_reduced <- select(train_reduced, -Policy_Sales_Channel, -Region_Code)
+train_reduced <- select(train_reduced, -Policy_Sales_Channel, -Region_Code)
 
 save(train_reduced, file = paste(datasets_dir, "train_reduced.RData", sep = '/'))
 
