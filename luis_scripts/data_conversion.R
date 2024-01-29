@@ -22,6 +22,16 @@ train_df$Driving_License <- fct_recode(train_df$Driving_License, "No" = "0", "Ye
 # Recode the 'Previously_Insured' variable to have the levels as "No" and "Yes"
 train_df$Previously_Insured <- fct_recode(train_df$Previously_Insured, "No" = "0", "Yes" = "1")
 
+# Ensure that the 'Age' variable is an integer
+train_df$Age <- as.integer(train_df$Age)
+# Ensure that the 'Annual_Premium' variable is numeric
+train_df$Annual_Premium <- as.numeric(train_df$Annual_Premium)
+# Ensure that the 'Vintage' variable is an integer
+train_df$Vintage <- as.integer(train_df$Vintage)
+
+your_data$numeric_variable <- as.integer(your_data$numeric_variable)
+
+
 # Drop the 'id' column
 train_df <- subset(train_df, select = -id)
 
@@ -41,6 +51,15 @@ test_df[columns_to_convert] <- lapply(test_df[columns_to_convert], as.factor)
 
 # Recode the 'Driving_License' variable to have the levels as "No" and "Yes"
 test_df$Driving_License <- fct_recode(test_df$Driving_License, "No" = "0", "Yes" = "1")
+# Recode the 'Previously_Insured' variable to have the levels as "No" and "Yes"
+test_df$Previously_Insured <- fct_recode(test_df$Previously_Insured, "No" = "0", "Yes" = "1")
+
+# Ensure that the 'Age' variable is an integer
+test_df$Age <- as.integer(test_df$Age)
+# Ensure that the 'Annual_Premium' variable is numeric
+test_df$Annual_Premium <- as.numeric(test_df$Annual_Premium)
+# Ensure that the 'Vintage' variable is an integer
+test_df$Vintage <- as.integer(test_df$Vintage)
 
 # Drop the 'id' column
 test_df <- subset(test_df, select = -id)

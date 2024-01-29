@@ -1,18 +1,19 @@
-# LIBRARIES ------------------------------------------------------------------------------------------------
-if(!require(ggplot2)) install.packages("ggplot2")
-if(!require(ROSE)) install.packages("ROSE")
-if(!require(mgcViz)) install.packages("mgcViz")
-library(mgcViz)
-library(ROSE)
-library(ggplot2)
-library(mgcv)
-library(dplyr)
+  # LIBRARIES ------------------------------------------------------------------------------------------------
+  if(!require(ggplot2)) install.packages("ggplot2")
+  if(!require(ROSE)) install.packages("ROSE")
+  if(!require(mgcViz)) install.packages("mgcViz")
+  library(mgcViz)
+  library(ROSE)
+  library(ggplot2)
+  library(mgcv)
+  library(dplyr)
 
 
-# LOAD THE DATA-----------------------------------------------------------------
-# Define the path to the datasets
-current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
-datasets_dir <- paste(current_path,"datasets", sep = "/")
+  # LOAD THE DATA-----------------------------------------------------------------
+  # Define the path to the datasets
+  current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
+  datasets_dir <- paste(current_path,"../datasets", sep = "/")
+  datasets_dir
 
 # Now that the dataframe is stored in an .RData format we can simply load it and the 
 # it will have the same name as the filename
@@ -20,40 +21,6 @@ load(paste(datasets_dir, "train_df.RData", sep = "/"))
 
 # In case we may want to do some processing to the test dataset later I'll change the name to the dataframe
 data <- get("train_df")
-
-# Group categories with few observations for Policy_Sales_Channel and Region_Code
-
-data_summary <- data %>%
-  group_by(Policy_Sales_Channel) %>%
-  summarise(Count = n(), .groups = "drop") %>%
-  mutate(Percentage = Count / sum(Count)) %>%
-  arrange(desc(Percentage)) %>%
-  head(10)
-data <- data %>% mutate(Channels_Reduced = case_when(Policy_Sales_Channel %in% data_summary$Policy_Sales_Channel[1:4] ~ Policy_Sales_Channel, TRUE ~ as.factor("0")))
-
-data_summary <- data %>%
-  group_by(Region_Code) %>%
-  summarise(Count = n(), .groups = "drop") %>%
-  mutate(Percentage = Count / sum(Count)) %>%
-  arrange(desc(Percentage)) %>%
-  head(10)
-data <- data %>% mutate(Region_Reduced = case_when(Region_Code %in% data_summary$Region_Code[1:4] ~ Region_Code, TRUE ~ as.factor("0")))
-
-skim(data)
-
-data_summary <- data %>%
-  group_by(Region_Reduced) %>%
-  summarise(Count = n(), .groups = "drop") %>%
-  mutate(Percentage = Count / sum(Count)) %>%
-  arrange(desc(Percentage)) 
-data_summary
-
-data_summary <- data %>%
-  group_by(Channels_Reduced) %>%
-  summarise(Count = n(), .groups = "drop") %>%
-  mutate(Percentage = Count / sum(Count)) %>%
-  arrange(desc(Percentage)) 
-data_summary
 
 #-------------------------------------------------------------------------------
 # MODELS
@@ -311,18 +278,28 @@ gam_sampled <- gam(Response ~ Gender + Driving_License + Previously_Insured +
 # help(gam)
 summary(gam_sampled)
 
-plot(gam_sampled, pages=1)
-plot(gam_sampled, pages=1, scheme=1, unconditional=TRUE)
-plot(gam_sampled, pages=1, scheme=2)
-plot(gam_sampled, pages=1, residuals=TRUE)
-plot(gam_sampled, pages=2, residuals=TRUE)
-plot(gam_sampled, pages=1,seWithMean=TRUE)
+
+
+
+
+
+
+
+
+
+
+plot(gam_reduced_oversampled, pages=1)
+plot(gam_reduced_oversampled, pages=1, scheme=1, unconditional=TRUE)
+plot(gam_reduced_oversampled, pages=1, scheme=2)
+plot(gam_reduced_oversampled, pages=1, residuals=TRUE)
+plot(gam_reduced_oversampled, pages=2, residuals=TRUE)
+plot(gam_reduced_oversampled, pages=1,seWithMean=TRUE)
 
 # What does the p-value mean here?
 gam.check(gam_sampled)
 
 
-gam_sampledViz <- getViz(gam_sampled)
+gam_sampledViz <- getViz(gam_reduced_oversampled)
 print(plot(gam_sampledViz, allTerms = T), pages = 1)
 plot(gam_sampledViz)
 
