@@ -29,13 +29,29 @@ train_df$Annual_Premium <- as.numeric(train_df$Annual_Premium)
 # Ensure that the 'Vintage' variable is an integer
 train_df$Vintage <- as.integer(train_df$Vintage)
 
-your_data$numeric_variable <- as.integer(your_data$numeric_variable)
-
-
 # Drop the 'id' column
 train_df <- subset(train_df, select = -id)
 
-skim(train_df)
+# Change the levels of 'Gender' and 'Vehicle_Age' to be consistent with the test dataset
+Gender_current_levels <- levels(train_df$Gender)
+# Gender_current_levels
+Vehicle_Age_current_levels <- levels(train_df$Vehicle_Age)
+# Vehicle_Age_current_levels
+# skim(train_df)
+
+# New levels for Gender variable
+Gender_level_mapping <- c("Female" = Gender_current_levels[1], "Male" = Gender_current_levels[2])
+# New levels for Vehicle_Age variable
+Vehicle_Age_level_mapping <- c("< 1 Year" = Vehicle_Age_current_levels[1], "> 2 Years" = Vehicle_Age_current_levels[2], "1-2 Year" = Vehicle_Age_current_levels[3])
+# Change the levels of 'Gender' in train_df
+train_df$Gender <- fct_recode(train_df$Gender, !!!Gender_level_mapping)
+# Change the levels of 'Vehicle_Age' in train_df
+train_df$Vehicle_Age <- fct_recode(train_df$Vehicle_Age, !!!Vehicle_Age_level_mapping)
+
+# Check that the levels have been changed
+# levels(train_df$Gender)
+# levels(train_df$Vehicle_Age)
+# skim(train_df)
 
 # Save as .RData to have consistency when working with the converted datasets later
 save(train_df, file = paste(datasets_dir, "train_df.RData", sep = '/'))
@@ -63,6 +79,17 @@ test_df$Vintage <- as.integer(test_df$Vintage)
 
 # Drop the 'id' column
 test_df <- subset(test_df, select = -id)
+
+levels(train_df$Gender)
+levels(test_df$Gender)
+
+
+# Example assuming 'Gender' is one of the variables
+test_reduced$Gender <- factor(test_reduced$Gender, levels = levels(train_data$Gender))
+
+
+
+
 
 save(test_df, file = paste(datasets_dir, "test_df.RData", sep = '/'))
 

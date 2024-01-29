@@ -24,22 +24,28 @@ data <- get("train_reduced")
 # MODELING ---------------------------------------------------------------------
 
 # Upsample the minority class to balance the dataset
-data_upsampled_balanced <- ROSE(Response ~ ., data = data, seed = 42)$data
+# data_upsampled_balanced <- ROSE(Response ~ ., data = data, seed = 42)$data
 
-# sample_percentage <- 0.50
-# sampled_data <- your_data[sample(nrow(your_data), round(sample_percentage * nrow(your_data)), replace = FALSE), ]
+data_upsampled_balanced <- ovun.sample(Response ~ ., data = data, method = "over")$data
+skim(data_upsampled_balanced)
 
-data_balanced_sampled <- data_upsampled_balanced[sample(nrow(data_upsampled_balanced), 100000, replace = FALSE), ]
+sample_percentage <- 0.35
+data_balanced_sampled <- data_upsampled_balanced[sample(nrow(data_upsampled_balanced), round(sample_percentage * nrow(data_upsampled_balanced)), replace = FALSE), ]
+skim(data_balanced_sampled)
+
+# data_balanced_sampled <- data_upsampled_balanced[sample(nrow(data_upsampled_balanced), 100000, replace = FALSE), ]
 
 gam_sampled <- gam(Response ~ Gender + Driving_License + Previously_Insured + 
-                        Vehicle_Damage + Channels_Reduced + s(log(Age)) +
-                        s(Annual_Premium) + Region_Reduced + Vehicle_Age, 
-                        data = data_balanced_sampled, family = binomial(), 
-                        optimizer = 'efs', 
-                        select = TRUE)#, # automatic smoothness selection with CV
-                        # method = "REML")
-
-summary(gam_sampled)
+                  Vehicle_Damage + Channels_Reduced + s(log(Age)) +
+                  s(log(Annual_Premium)) + Region_Reduced + Vehicle_Age, 
+                  data = data_balanced_sampled,
+                  # te(Age, Annual_Premium),
+                  family = binomial(), 
+                  optimizer = 'efs', 
+                  select = TRUE)#, # automatic smoothness selection with CV
+                  # method = "REML") #Restricted Maximum Likelihood estimation for smoother selection
+                  # this approach indirectly achieves regularization by selecting the appropriate degrees of freedom for each smoothing term.
+summary(gam_sampled)  
 
 # Residuals vs. Fitted Values:
 plot(gam_sampled, 1)
@@ -97,4 +103,43 @@ gridPrint(check1D(gam_sampledViz, "log(Age)") + l_gridCheck1D(gridFun = sd, show
           check1D(gam_sampledViz, "Vehicle_Age") + l_gridCheck1D(gridFun = sd, showReps = TRUE)
 )
 
-# 
+
+# The Variance Inflation Factor (VIF) is used to measure the degree of multicollinearity among the predictor variables in a regression model. High VIF values indicate that the variables may be highly correlated, leading to unstable and unreliable estimates of the regression coefficients.
+
+# In your case, the VIF values are extremely high, leading to an issue known as perfect multicollinearity. This happens when one or more variables in the model can be exactly predicted from others. In your car::vif output, all VIF values are infinite (Inf), suggesting that there is a perfect linear relationship between the predictors.
+
+# Looking at your data, it seems like the issue might be related to the way factors are defined. The factors Gender, Driving_License, Previously_Insured, Vehicle_Age, Vehicle_Damage, Channels_Reduced, and Region_Reduced are all converted to factors with two levels. This might lead to perfect multicollinearity because these factors might be perfectly predictable from each other.
+
+car::vif(gam_sampled)
+
+
+# Performance Metrics:
+
+load(paste(datasets_dir, "test_reduced.RData", sep = "/"))
+str(test_reduced)
+
+#1. Deviance Explained:
+# Deviance is a measure of how well the model explains the observed data. Lower deviance indicates a better fit.
+deviance <- summary(gam_sampled)$deviance
+deviance
+
+#2. AUC-ROC:
+# For binary classification, the Area Under the Receiver Operating Characteristic Curve (AUC-ROC) measures the model's ability to discriminate between classes.
+install.packages("pROC")
+library(pROC)
+
+test_predictions <- predict(gam_sampled, newdata = train_reduced, type = "response") 
+
+roc_curve <- roc(train_reduced$Response, predict(gam_sampled, newdata = test_reduced, type = "response"))
+
+auc_score <- auc(roc_curve)
+
+?roc
+
+#3. Accuracy, Sensitivity, Specificity:
+# Traditional metrics like accuracy, sensitivity, and specificity can be useful.
+# library(caret)
+# confusion_matrix <- confusionMatrix(predict(gam_sampled, type = "response") > 0.5, train_df$Response)
+# accuracy <- confusion_matrix$overall["Accuracy"]
+# sensitivity <- confusion_matrix$byClass["Sensitivity"]
+# specificity <- confusion_matrix$byClass["Specificity"]
