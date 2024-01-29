@@ -64,16 +64,103 @@ summary(gam_all)
 #1. AUC-ROC:
 # For binary classification, the Area Under the Receiver Operating Characteristic Curve (AUC-ROC) measures the model's ability to discriminate between classes.
 
-test_predictions <- predict(gam_all, newdata = test_data, type = "response") 
+probabilities <- predict(gam_all, newdata = subset(test_data, select = -Response), type = "response") 
 
-roc_curve <- roc(test_data$Response, test_predictions)
-
+roc_curve <- roc(test_data$Response, probabilities)
 auc_score <- auc(roc_curve)
-auc_score
+# auc_score
 
-#2. Accuracy, Sensitivity, Specificity:
-# Traditional metrics like accuracy, sensitivity, and specificity can be useful.
-confusion_matrix <- confusionMatrix(predict(gam_all, type = "response") > 0.5, test_data$Response)
-accuracy <- confusion_matrix$overall["Accuracy"]
-sensitivity <- confusion_matrix$byClass["Sensitivity"]
-specificity <- confusion_matrix$byClass["Specificity"]
+youdens_j <- coords(roc_curve, "best", best.method = "youden")
+optimal_threshold <- youdens_j$threshold
+# print(optimal_threshold)
+
+# Open a PNG file to save the ROC curve
+png(paste0(current_path, "/../plots/ROCGAMAll.png"),
+    width = 10, height = 10,
+    units = "in", res = 300)
+
+# Plot the ROC curve using plot.roc from the pROC package
+plot.roc(roc_curve, col = "blue", main = "ROC Curve", lwd = 2)
+
+# Add a point for the best threshold
+points(youdens_j$specificity, youdens_j$sensitivity, pch = 19, col = "red")
+
+# Adding a legend or text to mark the point
+text(youdens_j$specificity, youdens_j$sensitivity, labels = paste("Threshold:", round(optimal_threshold, 2)), pos = 4)
+
+# Add labels and legend
+abline(h = 0, v = 1, lty = 2, col = "gray")
+legend("upright", legend = paste("AUC =", round(auc(roc_curve), 2)), col = "blue", lwd = 2)
+
+# Close the PNG file
+dev.off()
+
+
+#2. Confusion Matrix and Accuracy:
+
+# Obtain predicted classes based on the optimal threshold
+predicted_classes <- ifelse(probabilities > optimal_threshold, "Yes", "No")
+
+# Create the confusion matrix
+conf_matrix <- table(Actual = test_data$Response, Predicted = predicted_classes)
+
+conf_matrix_prop <- prop.table(conf_matrix, margin = 1)
+
+p2 <- ggplot(data = as.data.frame(conf_matrix_prop), 
+       aes(x = Actual, y = Predicted, fill = Freq)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = scales::percent(Freq)), vjust = 1) +
+  scale_fill_gradient(low = "white", high = "blue") +
+  labs(x = "Predicted", y = "Actual", fill = "Proportion") +
+  theme_minimal()
+p2
+
+ggsave(paste(current_path, "/../plots/ConfusionMatrixGAMAll.png", sep = "/"),
+      plot = p2,
+      width = 10, height = 10, dpi = 300)
+
+
+# Calculate accuracy
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+cat("Accuracy:", round(accuracy, 2), "\n")
+
+# 3. Binned Residuals:
+binned.resids <- function(x, y, nclass = sqrt(length(x))){
+  breaks.index <- floor(length(x) * (1 : (nclass))/nclass)
+  breaks <- c(-Inf, sort(x)[breaks.index], Inf)
+  output <- NULL
+  xbreaks <- NULL
+  x.binned <- as.numeric(cut(x, breaks))
+  for(i in 1:nclass){
+  items <- (1:length(x))[x.binned == i]
+  x.range <- range(x[items])
+  xbar <- mean(x[items])
+  ybar <- mean(y[items])
+  n <- length(items)
+  sdev <- sd(y[items])
+  output <- rbind(output, c(xbar, ybar, n, x.range, 2 * sdev/sqrt(n)))
+  }
+  colnames(output) <- c("xbar", "ybar", "n", "x.lo", "x.hi", "2se")
+  return(list(binned = output, xbreaks = xbreaks))
+}
+
+res <- residuals(gam_all, type="response")
+
+# Calculate binned residuals
+binned_residuals <- binned.resids(probabilities, res, nclass = 50)$binned
+
+# Plot binned residuals
+plot(range(binned_residuals[,1]),
+     range(binned_residuals[,2]),
+     type = "n",
+     xlab = "Estimated Pr(Switching)", ylab = "Average residual",
+     main = "Binned Residual Plot")
+
+# Add lines for different columns in binned_residuals
+lines(binned_residuals[,1], col = "red")
+lines(binned_residuals[,2], col = "blue")
+lines(binned_residuals[,6], col = "green")
+
+# Add legend
+legend("topright", legend = c("Column 1", "Column 2", "Column 6"), col = c("red", "blue", "green"), lty = 1)
+
