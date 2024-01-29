@@ -16,3 +16,6 @@ load(paste(datasets_dir, "train_df.RData", sep = "/"))
 data <- get("train_df")
 
 # NAME YOUR SECTION AND DOCUMENT YOUR CODE-------------------------------------------------------------------
+library(earth)
+model <- earth(factor(Response) ~ log(Age) + Driving_License + Region_Code + Previously_Insured + Vehicle_Age + Vehicle_Damage + log(Annual_Premium) + Policy_Sales_Channel + Vintage, data = data)
+summary(model)

@@ -270,3 +270,6 @@ for (i in factor_variables_names[1:7]){
 # print(chi_squared_results)
 max_row <- chi_squared_results[which.max(chi_squared_results[['p_value']]), ]
 print(max_row)
+
+table(data$Gender, data$Driving_License)
+print(chi_squared_results)
