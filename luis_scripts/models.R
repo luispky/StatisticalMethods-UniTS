@@ -8,6 +8,7 @@ library(ggplot2)
 library(mgcv)
 library(dplyr)
 library(skimr)
+library(pROC)
 
 
 # LOAD THE DATA-----------------------------------------------------------------
@@ -70,38 +71,38 @@ plot(gam_sampled, 5)
 # Check for patterns in residuals against smoothed predictors.
 
 
-plot(gam_sampled, pages=1, scheme=1, unconditional=TRUE)
-plot(gam_sampled, pages=1, scheme=2)
-plot(gam_sampled, pages=1, residuals=TRUE)
-plot(gam_sampled, pages=2, residuals=TRUE)
-plot(gam_sampled, pages=1,seWithMean=TRUE)
+# plot(gam_sampled, pages=1, scheme=1, unconditional=TRUE)
+# plot(gam_sampled, pages=1, scheme=2)
+# plot(gam_sampled, pages=1, residuals=TRUE)
+# plot(gam_sampled, pages=2, residuals=TRUE)
+# plot(gam_sampled, pages=1,seWithMean=TRUE)
 
-# What does the p-value mean here?
-gam.check(gam_sampled)
+# # What does the p-value mean here?
+# gam.check(gam_sampled)
 
-gam_sampledViz <- getViz(gam_sampled)
-print(plot(gam_sampledViz, allTerms = T), pages = 1)
-plot(gam_sampledViz)
+# gam_sampledViz <- getViz(gam_sampled)
+# print(plot(gam_sampledViz, allTerms = T), pages = 1)
+# plot(gam_sampledViz)
 
-pl <- plot(gam_sampledViz, allTerms = T) + l_points() + l_fitLine(linetype = 3) + l_fitContour() + 
-      l_ciLine(colour = 2) + l_ciBar() + l_fitPoints(size = 1, col = 2) + theme_get() + labs(title = NULL) #+ 
-      # l_dens(type = "cond")
-print(pl, pages = 1)
+# pl <- plot(gam_sampledViz, allTerms = T) + l_points() + l_fitLine(linetype = 3) + l_fitContour() + 
+#       l_ciLine(colour = 2) + l_ciBar() + l_fitPoints(size = 1, col = 2) + theme_get() + labs(title = NULL) #+ 
+#       # l_dens(type = "cond")
+# print(pl, pages = 1)
 
-# What does the p-value mean here?
-check(gam_sampledViz)
+# # What does the p-value mean here?
+# check(gam_sampledViz)
 
-gam_sampledViz <- getViz(gam_sampled, nsim=100)
-gridPrint(check1D(gam_sampledViz, "log(Age)") + l_gridCheck1D(gridFun = sd, showReps = TRUE), 
-          check1D(gam_sampledViz, "Annual_Premium") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-          check1D(gam_sampledViz, "Gender") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-          check1D(gam_sampledViz, "Driving_License") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-          check1D(gam_sampledViz, "Previously_Insured") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-          check1D(gam_sampledViz, "Vehicle_Damage") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-          check1D(gam_sampledViz, "Channels_Reduced") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-          check1D(gam_sampledViz, "Region_Reduced") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-          check1D(gam_sampledViz, "Vehicle_Age") + l_gridCheck1D(gridFun = sd, showReps = TRUE)
-)
+# gam_sampledViz <- getViz(gam_sampled, nsim=100)
+# gridPrint(check1D(gam_sampledViz, "log(Age)") + l_gridCheck1D(gridFun = sd, showReps = TRUE), 
+#           check1D(gam_sampledViz, "Annual_Premium") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+#           check1D(gam_sampledViz, "Gender") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+#           check1D(gam_sampledViz, "Driving_License") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+#           check1D(gam_sampledViz, "Previously_Insured") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+#           check1D(gam_sampledViz, "Vehicle_Damage") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+#           check1D(gam_sampledViz, "Channels_Reduced") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+#           check1D(gam_sampledViz, "Region_Reduced") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+#           check1D(gam_sampledViz, "Vehicle_Age") + l_gridCheck1D(gridFun = sd, showReps = TRUE)
+# )
 
 
 # The Variance Inflation Factor (VIF) is used to measure the degree of multicollinearity among the predictor variables in a regression model. High VIF values indicate that the variables may be highly correlated, leading to unstable and unreliable estimates of the regression coefficients.
@@ -110,25 +111,22 @@ gridPrint(check1D(gam_sampledViz, "log(Age)") + l_gridCheck1D(gridFun = sd, show
 
 # Looking at your data, it seems like the issue might be related to the way factors are defined. The factors Gender, Driving_License, Previously_Insured, Vehicle_Age, Vehicle_Damage, Channels_Reduced, and Region_Reduced are all converted to factors with two levels. This might lead to perfect multicollinearity because these factors might be perfectly predictable from each other.
 
-car::vif(gam_sampled)
+# car::vif(gam_sampled)
 
 
 # Performance Metrics:
 
 load(paste(datasets_dir, "test_reduced.RData", sep = "/"))
-str(test_reduced)
 
 #1. Deviance Explained:
 # Deviance is a measure of how well the model explains the observed data. Lower deviance indicates a better fit.
-deviance <- summary(gam_sampled)$deviance
-deviance
+# deviance <- summary(gam_sampled)$deviance
+# deviance
 
 #2. AUC-ROC:
 # For binary classification, the Area Under the Receiver Operating Characteristic Curve (AUC-ROC) measures the model's ability to discriminate between classes.
-install.packages("pROC")
-library(pROC)
 
-test_predictions <- predict(gam_sampled, newdata = train_reduced, type = "response") 
+test_predictions <- predict(gam_sampled, newdata = test_reduced, type = "response") 
 
 roc_curve <- roc(train_reduced$Response, predict(gam_sampled, newdata = test_reduced, type = "response"))
 
