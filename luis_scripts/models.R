@@ -20,6 +20,7 @@ load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
 data <- get("train_reduced")
 
 # BALANCE THE DATASET ----------------------------------------------------------
+# and train/test split
 
 # Upsample the minority class to balance the dataset
 # data_upsampled_balanced <- ROSE(Response ~ ., data = data, seed = 42)$data
@@ -71,7 +72,7 @@ auc_score
 
 #2. Accuracy, Sensitivity, Specificity:
 # Traditional metrics like accuracy, sensitivity, and specificity can be useful.
-# confusion_matrix <- confusionMatrix(predict(gam_sampled, type = "response") > 0.5, train_df$Response)
-# accuracy <- confusion_matrix$overall["Accuracy"]
-# sensitivity <- confusion_matrix$byClass["Sensitivity"]
-# specificity <- confusion_matrix$byClass["Specificity"]
+confusion_matrix <- confusionMatrix(predict(gam_sampled, type = "response") > 0.5, data_balanced_test$Response)
+accuracy <- confusion_matrix$overall["Accuracy"]
+sensitivity <- confusion_matrix$byClass["Sensitivity"]
+specificity <- confusion_matrix$byClass["Specificity"]
