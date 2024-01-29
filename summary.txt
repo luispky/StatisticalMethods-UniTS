@@ -1,0 +1,258 @@
+Call:
+glm(formula = df.raw$Response ~ ., family = binomial(link = "logit"), 
+    data = df.raw)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.4751  -0.6251  -0.0455  -0.0297   3.9910  
+
+Coefficients:
+                                Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                   -4.064e+00  1.706e-01 -23.824  < 2e-16 ***
+id                            -2.991e-08  4.914e-08  -0.609    0.543    
+GenderMale                     9.071e-02  1.113e-02   8.152 3.59e-16 ***
+Age                           -2.535e-02  5.457e-04 -46.449  < 2e-16 ***
+Driving_License                1.211e+00  1.634e-01   7.411 1.25e-13 ***
+Region_Code                   -3.678e-04  4.357e-04  -0.844    0.399    
+Previously_Insured            -3.973e+00  8.265e-02 -48.069  < 2e-16 ***
+Vehicle_Age> 2 Years           1.381e+00  2.696e-02  51.239  < 2e-16 ***
+Vehicle_Age1-2 Year            1.172e+00  1.880e-02  62.341  < 2e-16 ***
+Vehicle_DamageYes              2.028e+00  3.427e-02  59.187  < 2e-16 ***
+Annual_Premium                 2.572e-06  2.956e-07   8.700  < 2e-16 ***
+Policy_Sales_Channel          -2.441e-03  1.095e-04 -22.302  < 2e-16 ***
+Vintage                       -7.299e-06  6.461e-05  -0.113    0.910    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 283546  on 381108  degrees of freedom
+Residual deviance: 209502  on 381096  degrees of freedom
+AIC: 209528
+
+Number of Fisher Scoring iterations: 9
+
+
+--------------------------------------------------------------------------------------------------------------------
+
+Call:
+glm(formula = df$Response ~ ., family = binomial(link = "logit"), 
+    data = df)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.4546  -0.6142  -0.0474  -0.0279   4.2434  
+
+Coefficients:
+                                Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                   -4.616e+00  2.574e-01 -17.937  < 2e-16 ***
+id                            -1.438e-08  4.973e-08  -0.289 0.772496    
+GenderMale                     6.754e-02  1.132e-02   5.967 2.42e-09 ***
+Age                           -2.546e-02  5.539e-04 -45.966  < 2e-16 ***
+Driving_License1               1.181e+00  1.638e-01   7.210 5.59e-13 ***
+Region_Code1                   2.310e-01  1.348e-01   1.714 0.086508 .  
+Region_Code2                   5.375e-01  1.066e-01   5.043 4.58e-07 ***
+Region_Code3                   9.454e-01  9.029e-02  10.471  < 2e-16 ***
+Region_Code4                   8.781e-01  1.097e-01   8.005 1.20e-15 ***
+Region_Code5                   7.250e-01  1.262e-01   5.747 9.09e-09 ***
+Region_Code6                   9.158e-01  1.007e-01   9.093  < 2e-16 ***
+Region_Code7                   7.020e-01  1.004e-01   6.991 2.74e-12 ***
+Region_Code8                   5.886e-01  8.594e-02   6.850 7.40e-12 ***
+Region_Code9                   4.038e-01  1.091e-01   3.701 0.000215 ***
+Region_Code10                  6.727e-01  1.092e-01   6.163 7.15e-10 ***
+Region_Code11                  1.119e+00  9.178e-02  12.193  < 2e-16 ***
+Region_Code12                  7.461e-01  1.065e-01   7.007 2.43e-12 ***
+Region_Code13                  6.654e-01  1.027e-01   6.478 9.32e-11 ***
+Region_Code14                  8.052e-01  1.012e-01   7.957 1.76e-15 ***
+Region_Code15                  5.604e-01  9.134e-02   6.136 8.49e-10 ***
+Region_Code16                  5.883e-01  1.277e-01   4.608 4.07e-06 ***
+Region_Code17                  4.640e-01  1.177e-01   3.942 8.08e-05 ***
+Region_Code18                  1.052e+00  9.581e-02  10.982  < 2e-16 ***
+Region_Code19                  7.432e-01  1.119e-01   6.641 3.11e-11 ***
+Region_Code20                  3.326e-01  1.120e-01   2.969 0.002988 ** 
+Region_Code21                  8.819e-01  1.074e-01   8.208 2.25e-16 ***
+Region_Code22                  3.285e-01  1.473e-01   2.231 0.025705 *  
+Region_Code23                  9.085e-01  1.087e-01   8.355  < 2e-16 ***
+Region_Code24                  7.798e-01  1.058e-01   7.372 1.68e-13 ***
+Region_Code25                  2.107e-01  1.342e-01   1.569 0.116554    
+Region_Code26                  2.995e-01  1.179e-01   2.541 0.011066 *  
+Region_Code27                  5.749e-01  1.135e-01   5.064 4.12e-07 ***
+Region_Code28                  8.351e-01  8.389e-02   9.954  < 2e-16 ***
+Region_Code29                  1.067e+00  8.978e-02  11.882  < 2e-16 ***
+Region_Code30                  9.286e-01  9.230e-02  10.061  < 2e-16 ***
+Region_Code31                  3.902e-01  1.177e-01   3.315 0.000917 ***
+Region_Code32                  8.041e-01  1.116e-01   7.206 5.77e-13 ***
+Region_Code33                  7.187e-01  9.355e-02   7.683 1.56e-14 ***
+Region_Code34                  3.771e-01  1.292e-01   2.920 0.003501 ** 
+Region_Code35                  1.048e+00  9.363e-02  11.191  < 2e-16 ***
+Region_Code36                  6.553e-01  9.382e-02   6.984 2.86e-12 ***
+Region_Code37                  6.039e-01  9.954e-02   6.066 1.31e-09 ***
+Region_Code38                  9.295e-01  1.035e-01   8.983  < 2e-16 ***
+Region_Code39                  6.075e-01  9.634e-02   6.306 2.87e-10 ***
+Region_Code40                  5.998e-01  1.244e-01   4.822 1.42e-06 ***
+Region_Code41                  1.020e+00  8.754e-02  11.657  < 2e-16 ***
+Region_Code42                  2.903e-01  1.865e-01   1.557 0.119574    
+Region_Code43                  4.292e-01  1.101e-01   3.896 9.76e-05 ***
+Region_Code44                  1.017e-01  2.072e-01   0.491 0.623485    
+Region_Code45                  7.825e-01  9.579e-02   8.169 3.12e-16 ***
+Region_Code46                  7.450e-01  8.733e-02   8.532  < 2e-16 ***
+Region_Code47                  4.853e-01  9.479e-02   5.120 3.06e-07 ***
+Region_Code48                  2.138e-01  9.880e-02   2.164 0.030472 *  
+Region_Code49                  3.999e-01  1.262e-01   3.170 0.001523 ** 
+Region_Code50                  3.426e-01  9.565e-02   3.582 0.000341 ***
+Region_Code51                  8.000e-01  2.393e-01   3.343 0.000829 ***
+Region_Code52                  7.005e-01  2.204e-01   3.179 0.001478 ** 
+Previously_Insured1           -3.947e+00  8.277e-02 -47.684  < 2e-16 ***
+Vehicle_Age> 2 Years           5.586e-01  3.091e-02  18.074  < 2e-16 ***
+Vehicle_Age1-2 Year            3.484e-01  2.409e-02  14.458  < 2e-16 ***
+Vehicle_DamageYes              1.960e+00  3.467e-02  56.531  < 2e-16 ***
+Annual_Premium                 9.152e-07  3.427e-07   2.671 0.007566 ** 
+Policy_Sales_Channel2          5.020e-01  1.173e+00   0.428 0.668705    
+Policy_Sales_Channel3          1.037e+00  2.055e-01   5.045 4.53e-07 ***
+Policy_Sales_Channel4          6.528e-01  2.155e-01   3.029 0.002451 ** 
+Policy_Sales_Channel6         -1.059e+01  2.648e+02  -0.040 0.968108    
+Policy_Sales_Channel7          5.493e-01  1.996e-01   2.752 0.005926 ** 
+Policy_Sales_Channel8          3.250e-01  2.085e-01   1.559 0.119026    
+Policy_Sales_Channel9          4.165e-01  3.299e-01   1.263 0.206707    
+Policy_Sales_Channel10         3.595e-01  2.477e-01   1.451 0.146728    
+Policy_Sales_Channel11         1.571e-02  2.100e-01   0.075 0.940360    
+Policy_Sales_Channel12         3.381e-01  2.084e-01   1.622 0.104768    
+Policy_Sales_Channel13         2.809e-01  1.928e-01   1.457 0.145106    
+Policy_Sales_Channel14         4.012e-01  2.314e-01   1.734 0.082947 .  
+Policy_Sales_Channel15         5.428e-01  2.238e-01   2.426 0.015272 *  
+Policy_Sales_Channel16         2.843e-01  2.469e-01   1.151 0.249566    
+Policy_Sales_Channel17         1.070e+00  7.306e-01   1.464 0.143222    
+Policy_Sales_Channel18        -3.404e-01  4.678e-01  -0.728 0.466799    
+Policy_Sales_Channel19         1.695e-01  3.120e-01   0.543 0.586970    
+Policy_Sales_Channel20         5.419e-01  7.032e-01   0.771 0.440985    
+Policy_Sales_Channel21         1.513e-01  3.693e-01   0.410 0.682047    
+Policy_Sales_Channel22        -1.037e-01  3.152e-01  -0.329 0.742134    
+Policy_Sales_Channel23         3.776e-01  2.356e-01   1.602 0.109109    
+Policy_Sales_Channel24         3.374e-01  2.139e-01   1.577 0.114714    
+Policy_Sales_Channel25         7.756e-01  1.906e-01   4.068 4.73e-05 ***
+Policy_Sales_Channel26         7.120e-01  1.802e-01   3.951 7.77e-05 ***
+Policy_Sales_Channel27         9.843e-01  1.309e+00   0.752 0.452007    
+Policy_Sales_Channel28         1.191e+00  1.259e+00   0.946 0.344156    
+Policy_Sales_Channel29         3.393e-01  2.122e-01   1.599 0.109826    
+Policy_Sales_Channel30         3.551e-01  2.014e-01   1.763 0.077875 .  
+Policy_Sales_Channel31         7.655e-01  2.048e-01   3.738 0.000186 ***
+Policy_Sales_Channel32         1.401e-01  8.096e-01   0.173 0.862585    
+Policy_Sales_Channel33        -1.176e+01  2.840e+02  -0.041 0.966964    
+Policy_Sales_Channel34        -1.152e+01  2.848e+02  -0.040 0.967741    
+Policy_Sales_Channel35         2.639e-01  4.019e-01   0.657 0.511398    
+Policy_Sales_Channel36         1.073e+00  3.658e-01   2.934 0.003342 ** 
+Policy_Sales_Channel37        -2.655e-02  3.372e-01  -0.079 0.937251    
+Policy_Sales_Channel38        -1.041e+01  1.453e+02  -0.072 0.942886    
+Policy_Sales_Channel39        -6.121e-01  1.078e+00  -0.568 0.570324    
+Policy_Sales_Channel40         1.616e-02  8.136e-01   0.020 0.984157    
+Policy_Sales_Channel41        -5.510e+00  5.354e+02  -0.010 0.991789    
+Policy_Sales_Channel42         6.055e-01  2.956e-01   2.048 0.040537 *  
+Policy_Sales_Channel43         1.489e+01  5.354e+02   0.028 0.977816    
+Policy_Sales_Channel44         6.598e-01  3.252e-01   2.029 0.042446 *  
+Policy_Sales_Channel45        -5.995e-02  4.583e-01  -0.131 0.895908    
+Policy_Sales_Channel46        -1.099e+01  1.172e+02  -0.094 0.925321    
+Policy_Sales_Channel47         1.160e-01  4.361e-01   0.266 0.790311    
+Policy_Sales_Channel48        -6.792e-01  1.072e+00  -0.634 0.526190    
+Policy_Sales_Channel49         5.808e-01  8.477e-01   0.685 0.493258    
+Policy_Sales_Channel50        -1.199e+01  3.721e+02  -0.032 0.974305    
+Policy_Sales_Channel51        -2.936e-01  1.107e+00  -0.265 0.790794    
+Policy_Sales_Channel52         1.172e-01  2.084e-01   0.563 0.573697    
+Policy_Sales_Channel53         6.122e-01  4.918e-01   1.245 0.213252    
+Policy_Sales_Channel54         1.033e-01  3.341e-01   0.309 0.757144    
+Policy_Sales_Channel55         2.993e-01  1.986e-01   1.507 0.131746    
+Policy_Sales_Channel56         4.859e-01  3.857e-01   1.260 0.207664    
+Policy_Sales_Channel57         1.317e-01  1.155e+00   0.114 0.909247    
+Policy_Sales_Channel58        -2.768e-01  1.098e+00  -0.252 0.800997    
+Policy_Sales_Channel59         4.648e-01  2.953e-01   1.574 0.115518    
+Policy_Sales_Channel60         9.847e-02  2.370e-01   0.415 0.677807    
+Policy_Sales_Channel61        -5.775e-02  2.328e-01  -0.248 0.804087    
+Policy_Sales_Channel62         1.407e+00  1.417e+00   0.993 0.320829    
+Policy_Sales_Channel63         3.137e-01  1.099e+00   0.285 0.775325    
+Policy_Sales_Channel64        -2.401e-01  5.093e-01  -0.471 0.637290    
+Policy_Sales_Channel65        -1.549e-01  5.618e-01  -0.276 0.782745    
+Policy_Sales_Channel66         1.935e-01  1.088e+00   0.178 0.858865    
+Policy_Sales_Channel67        -1.208e+01  2.664e+02  -0.045 0.963837    
+Policy_Sales_Channel68         3.020e+00  1.517e+00   1.991 0.046505 *  
+Policy_Sales_Channel69         9.335e-01  1.181e+00   0.791 0.429106    
+Policy_Sales_Channel70        -1.163e+01  2.659e+02  -0.044 0.965107    
+Policy_Sales_Channel71        -1.111e+01  2.164e+02  -0.051 0.959043    
+Policy_Sales_Channel73        -5.969e-01  1.070e+00  -0.558 0.577106    
+Policy_Sales_Channel74        -1.077e+01  3.385e+02  -0.032 0.974618    
+Policy_Sales_Channel75        -1.104e+01  3.354e+02  -0.033 0.973746    
+Policy_Sales_Channel76        -1.074e+01  2.318e+02  -0.046 0.963031    
+Policy_Sales_Channel78         6.888e-01  6.974e-01   0.988 0.323323    
+Policy_Sales_Channel79        -1.196e+01  2.139e+02  -0.056 0.955392    
+Policy_Sales_Channel80         1.123e+00  6.550e-01   1.714 0.086463 .  
+Policy_Sales_Channel81         1.766e+00  7.175e-01   2.461 0.013840 *  
+Policy_Sales_Channel82        -1.030e+01  2.377e+02  -0.043 0.965447    
+Policy_Sales_Channel83        -1.019e+01  2.258e+02  -0.045 0.964026    
+Policy_Sales_Channel84        -5.660e+00  5.354e+02  -0.011 0.991565    
+Policy_Sales_Channel86         6.670e-01  5.127e-01   1.301 0.193298    
+Policy_Sales_Channel87         9.206e-01  8.890e-01   1.036 0.300379    
+Policy_Sales_Channel88        -1.028e+00  7.666e-01  -1.341 0.179927    
+Policy_Sales_Channel89         4.212e-01  8.454e-01   0.498 0.618358    
+Policy_Sales_Channel90         1.175e+00  5.258e-01   2.235 0.025447 *  
+Policy_Sales_Channel91         7.026e-01  2.868e-01   2.449 0.014308 *  
+Policy_Sales_Channel92         6.926e-01  7.262e-01   0.954 0.340244    
+Policy_Sales_Channel93         1.363e-01  6.698e-01   0.204 0.838700    
+Policy_Sales_Channel94         7.902e-01  4.385e-01   1.802 0.071551 .  
+Policy_Sales_Channel95        -1.059e+01  1.541e+02  -0.069 0.945207    
+Policy_Sales_Channel96        -1.080e+01  1.162e+02  -0.093 0.925948    
+Policy_Sales_Channel97         4.965e-01  1.114e+00   0.446 0.655798    
+Policy_Sales_Channel98        -5.065e-01  1.057e+00  -0.479 0.631691    
+Policy_Sales_Channel99        -1.041e+01  1.779e+02  -0.059 0.953330    
+Policy_Sales_Channel100        1.145e+00  9.371e-01   1.222 0.221751    
+Policy_Sales_Channel101        1.031e+00  9.726e-01   1.060 0.289151    
+Policy_Sales_Channel102       -1.026e+01  2.646e+02  -0.039 0.969076    
+Policy_Sales_Channel103        5.240e-01  4.174e-01   1.255 0.209409    
+Policy_Sales_Channel104       -1.090e+01  2.223e+02  -0.049 0.960873    
+Policy_Sales_Channel105       -5.942e+00  3.071e+02  -0.019 0.984562    
+Policy_Sales_Channel106        9.938e-01  4.240e-01   2.344 0.019078 *  
+Policy_Sales_Channel107        3.844e-01  8.455e-01   0.455 0.649399    
+Policy_Sales_Channel108        2.285e-01  1.142e+00   0.200 0.841380    
+Policy_Sales_Channel109       -1.382e-02  3.070e-01  -0.045 0.964086    
+Policy_Sales_Channel110       -4.364e-01  1.116e+00  -0.391 0.695628    
+Policy_Sales_Channel111        7.749e-02  4.153e-01   0.187 0.851990    
+Policy_Sales_Channel112       -1.155e+01  3.761e+02  -0.031 0.975507    
+Policy_Sales_Channel113        2.566e-01  4.580e-01   0.560 0.575255    
+Policy_Sales_Channel114       -1.623e-03  6.683e-01  -0.002 0.998062    
+Policy_Sales_Channel115       -1.012e+01  2.206e+02  -0.046 0.963408    
+Policy_Sales_Channel116        1.773e-01  3.181e-01   0.557 0.577232    
+Policy_Sales_Channel117       -6.088e+00  2.004e+02  -0.030 0.975768    
+Policy_Sales_Channel118       -1.068e+01  1.137e+02  -0.094 0.925144    
+Policy_Sales_Channel119        2.375e-01  5.217e-01   0.455 0.648927    
+Policy_Sales_Channel120        3.079e-01  2.304e-01   1.336 0.181417    
+Policy_Sales_Channel121        1.264e+00  3.652e-01   3.462 0.000535 ***
+Policy_Sales_Channel122        4.320e-01  1.822e-01   2.371 0.017753 *  
+Policy_Sales_Channel123        1.496e+01  5.354e+02   0.028 0.977706    
+Policy_Sales_Channel124        5.228e-01  1.802e-01   2.901 0.003719 ** 
+Policy_Sales_Channel125        1.696e-01  2.063e-01   0.822 0.410984    
+Policy_Sales_Channel126       -1.015e+01  2.059e+02  -0.049 0.960689    
+Policy_Sales_Channel127       -1.963e-01  4.217e-01  -0.466 0.641514    
+Policy_Sales_Channel128        1.495e-01  3.585e-01   0.417 0.676686    
+Policy_Sales_Channel129       -5.097e-01  6.508e-01  -0.783 0.433491    
+Policy_Sales_Channel130        7.960e-01  8.670e-01   0.918 0.358565    
+Policy_Sales_Channel131       -1.122e-01  3.519e-01  -0.319 0.749829    
+Policy_Sales_Channel132       -2.899e-01  5.682e-01  -0.510 0.609847    
+Policy_Sales_Channel133       -2.611e-01  5.592e-01  -0.467 0.640546    
+Policy_Sales_Channel134       -1.027e+01  1.418e+02  -0.072 0.942230    
+Policy_Sales_Channel135       -7.743e-02  4.164e-01  -0.186 0.852467    
+Policy_Sales_Channel136        6.886e-01  2.697e-01   2.553 0.010677 *  
+Policy_Sales_Channel137       -1.065e+01  1.641e+02  -0.065 0.948266    
+Policy_Sales_Channel138        9.506e-02  3.708e-01   0.256 0.797665    
+Policy_Sales_Channel139       -1.911e-01  3.518e-01  -0.543 0.587061    
+Policy_Sales_Channel140       -2.903e-01  4.517e-01  -0.643 0.520450    
+Policy_Sales_Channel143       -1.108e+01  5.354e+02  -0.021 0.983483    
+Policy_Sales_Channel144       -5.754e+00  5.354e+02  -0.011 0.991425    
+Policy_Sales_Channel145        5.926e-01  3.089e-01   1.919 0.055041 .  
+ [ reached getOption("max.print") -- omitted 17 rows ]
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 283546  on 381108  degrees of freedom
+Residual deviance: 204466  on 380892  degrees of freedom
+AIC: 204900
+
+Number of Fisher Scoring iterations: 12
