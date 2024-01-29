@@ -142,7 +142,7 @@ p21 <- ggplot(train_df, aes(x = Response, y = logAnnual_Premium, fill = Response
   guides(fill = FALSE)
 p21
 
-p22 <- (p18+p29)/(p20+p21)
+p22 <- (p18+p19)/(p20+p21)
 p22
 
 # The log transformations of the Age and Annual_Premium variables show more symmetric distributions. 

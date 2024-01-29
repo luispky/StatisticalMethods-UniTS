@@ -6,6 +6,9 @@ library(forcats)
 datasets_dir <- paste(dirname(rstudioapi::getActiveDocumentContext()$path),"../datasets", sep = "/")
 datasets_dir
 
+# Set seed for reproducibility
+set.seed(42)
+
 # Load the dataset with `stringsAsFactors = TRUE` takes care of the categorical variables as string 
 # to de directly imported as factors
 train_df <- read.csv(paste(datasets_dir, "train.csv", sep = "/"), stringsAsFactors = TRUE)
@@ -69,47 +72,47 @@ save(train_df, file = paste(datasets_dir, "train_df.RData", sep = '/'))
 # it will have the same name as the filename
 
 # Do the same for the test dataset
-test_df <- read.csv(paste(datasets_dir, "test.csv", sep = "/"), stringsAsFactors = TRUE)
-columns_to_convert <- c("Driving_License", "Region_Code",
-                        "Previously_Insured", "Policy_Sales_Channel")
-test_df[columns_to_convert] <- lapply(test_df[columns_to_convert], as.factor)
+# test_df <- read.csv(paste(datasets_dir, "test.csv", sep = "/"), stringsAsFactors = TRUE)
+# columns_to_convert <- c("Driving_License", "Region_Code",
+#                         "Previously_Insured", "Policy_Sales_Channel")
+# test_df[columns_to_convert] <- lapply(test_df[columns_to_convert], as.factor)
 
-# Recode the 'Driving_License' variable to have the levels as "No" and "Yes"
-test_df$Driving_License <- fct_recode(test_df$Driving_License, "No" = "0", "Yes" = "1")
-# Recode the 'Previously_Insured' variable to have the levels as "No" and "Yes"
-test_df$Previously_Insured <- fct_recode(test_df$Previously_Insured, "No" = "0", "Yes" = "1")
+# # Recode the 'Driving_License' variable to have the levels as "No" and "Yes"
+# test_df$Driving_License <- fct_recode(test_df$Driving_License, "No" = "0", "Yes" = "1")
+# # Recode the 'Previously_Insured' variable to have the levels as "No" and "Yes"
+# test_df$Previously_Insured <- fct_recode(test_df$Previously_Insured, "No" = "0", "Yes" = "1")
 
-# Ensure that the 'Age' variable is an integer
-test_df$Age <- as.integer(test_df$Age)
-# Ensure that the 'Annual_Premium' variable is numeric
-test_df$Annual_Premium <- as.numeric(test_df$Annual_Premium)
-# Ensure that the 'Vintage' variable is an integer
-test_df$Vintage <- as.integer(test_df$Vintage)
+# # Ensure that the 'Age' variable is an integer
+# test_df$Age <- as.integer(test_df$Age)
+# # Ensure that the 'Annual_Premium' variable is numeric
+# test_df$Annual_Premium <- as.numeric(test_df$Annual_Premium)
+# # Ensure that the 'Vintage' variable is an integer
+# test_df$Vintage <- as.integer(test_df$Vintage)
 
-# Drop the 'id' column
-test_df <- subset(test_df, select = -id)
+# # Drop the 'id' column
+# test_df <- subset(test_df, select = -id)
 
-# Change the levels of 'Gender', 'Vehicle_Age' and 'Vehicle_Damage' to be consistent with the test dataset
+# # Change the levels of 'Gender', 'Vehicle_Age' and 'Vehicle_Damage' to be consistent with the test dataset
 
-# Gender_current_levels
-Gender_current_levels <- levels(test_df$Gender)
-Vehicle_Age_current_levels <- levels(test_df$Vehicle_Age)
-Vehicle_Damage_current_levels <- levels(test_df$Vehicle_Damage)
+# # Gender_current_levels
+# Gender_current_levels <- levels(test_df$Gender)
+# Vehicle_Age_current_levels <- levels(test_df$Vehicle_Age)
+# Vehicle_Damage_current_levels <- levels(test_df$Vehicle_Damage)
 
-Gender_level_mapping <- c("Female" = Gender_current_levels[1], "Male" = Gender_current_levels[2])
-Vehicle_Age_level_mapping <- c("< 1 Year" = Vehicle_Age_current_levels[1], "> 2 Years" = Vehicle_Age_current_levels[2], "1-2 Year" = Vehicle_Age_current_levels[3])
-Vehicle_Damage_level_mapping <- c("No" = Vehicle_Damage_current_levels[1], "Yes" = Vehicle_Damage_current_levels[2])
+# Gender_level_mapping <- c("Female" = Gender_current_levels[1], "Male" = Gender_current_levels[2])
+# Vehicle_Age_level_mapping <- c("< 1 Year" = Vehicle_Age_current_levels[1], "> 2 Years" = Vehicle_Age_current_levels[2], "1-2 Year" = Vehicle_Age_current_levels[3])
+# Vehicle_Damage_level_mapping <- c("No" = Vehicle_Damage_current_levels[1], "Yes" = Vehicle_Damage_current_levels[2])
 
-skim(test_df)
+# skim(test_df)
 
-test_df$Gender <- fct_recode(test_df$Gender, !!!Gender_level_mapping)
-test_df$Vehicle_Age <- fct_recode(test_df$Vehicle_Age, !!!Vehicle_Age_level_mapping)
-test_df$Vehicle_Damage <- fct_recode(test_df$Vehicle_Damage, !!!Vehicle_Damage_level_mapping)
+# test_df$Gender <- fct_recode(test_df$Gender, !!!Gender_level_mapping)
+# test_df$Vehicle_Age <- fct_recode(test_df$Vehicle_Age, !!!Vehicle_Age_level_mapping)
+# test_df$Vehicle_Damage <- fct_recode(test_df$Vehicle_Damage, !!!Vehicle_Damage_level_mapping)
 
 
-skim(test_df)
+# skim(test_df)
 
-save(test_df, file = paste(datasets_dir, "test_df.RData", sep = '/'))
+# save(test_df, file = paste(datasets_dir, "test_df.RData", sep = '/'))
 
 # Reduced dataframe-----
 
@@ -171,7 +174,7 @@ data_summary
 
 train_reduced <- data
 
-train_reduced <- select(train_reduced, -Policy_Sales_Channel, -Region_Code)
+# train_reduced <- select(train_reduced, -Policy_Sales_Channel, -Region_Code)
 
 save(train_reduced, file = paste(datasets_dir, "train_reduced.RData", sep = '/'))
 
