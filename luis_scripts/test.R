@@ -68,3 +68,67 @@ plot(gam_sampled, 5)
 # car::vif(gam_sampled)
 
 
+models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_name = NULL, plot_cmatrix_name = NULL){
+  # Predict probabilities
+  probabilities <- predict(model, newdata = subset(test_data, select = -Response), type = "response")
+
+  # Compute ROC curve
+  roc_curve <- roc(test_data$Response, probabilities)
+  
+  # Calculate AUC
+  auc_score <- auc(roc_curve)
+
+  # Find optimal threshold using Youden's J statistic
+  youdens_j <- coords(roc_curve, "best", best.method = "youden")
+  optimal_threshold <- youdens_j$threshold
+
+  # Save ROC curve plot if specified
+  if(save_plots){
+    # Open a PNG file to save the ROC curve
+    png(paste0(current_path, "/../plots/", plot_auc_name, ".png"),
+        width = 10, height = 10,
+        units = "in", res = 300)
+
+    # Plot the ROC curve using plot.roc from the pROC package
+    plot.roc(roc_curve, col = "blue", main = "ROC Curve", lwd = 2)
+
+    # Add a point for the best threshold
+    points(youdens_j$specificity, youdens_j$sensitivity, pch = 19, col = "red")
+
+    # Adding a legend or text to mark the point
+    text(youdens_j$specificity, youdens_j$sensitivity, labels = paste("Threshold:", round(optimal_threshold, 2)), pos = 4)
+
+    # Add labels and legend
+    abline(h = 0, v = 1, lty = 2, col = "gray")
+    legend("topright", legend = paste("AUC =", round(auc(roc_curve), 2)), col = "blue", lwd = 2)
+
+    # Close the PNG file
+    dev.off()
+  }
+
+  # Obtain predicted classes based on the optimal threshold
+  predicted_classes <- ifelse(probabilities > optimal_threshold, "Yes", "No")
+
+  # Create the confusion matrix
+  conf_matrix <- table(Actual = test_data$Response, Predicted = predicted_classes)
+
+  conf_matrix_prop <- prop.table(conf_matrix, margin = 1)
+
+  if(save_plots){
+    # Plot confusion matrix
+    p <- ggplot(data = as.data.frame(conf_matrix_prop), 
+                aes(x = Actual, y = Predicted, fill = Freq)) +
+      geom_tile(color = "white") +
+      geom_text(aes(label = scales::percent(Freq)), vjust = 1) +
+      scale_fill_gradient(low = "white", high = "blue") +
+      labs(x = "Predicted", y = "Actual", fill = "Proportion") +
+      theme_minimal()
+
+    # Save the plot
+    ggsave(paste0(plot_path, "/../plots/", plot_cmatrix_name, ".png"),
+           plot = p,
+           width = 10, height = 10, dpi = 300)
+  }
+
+  return(list(auc_score, optimal_threshold, conf_matrix_prop))
+}
