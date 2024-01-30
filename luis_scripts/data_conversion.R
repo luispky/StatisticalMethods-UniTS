@@ -178,6 +178,23 @@ train_reduced <- select(train_reduced, -Policy_Sales_Channel, -Region_Code)
 
 save(train_reduced, file = paste(datasets_dir, "train_reduced.RData", sep = '/'))
 
+# TRAIN/TEST SPLIT FOR UNBALANCED BUT REDUCED DATASET******************************************************
+
+# Percentage of the data to be used for training
+sample_percentage <- 0.7
+
+# Sample a subset of the data
+sampled_rows <- sample(nrow(train_reduced), round(sample_percentage * nrow(train_reduced)), replace = FALSE)
+
+# Create the training set (the sampled rows)
+unbalanced_train <- train_reduced[sampled_rows, ]
+
+# Create the test set (the remaining rows)
+unbalanced_test <- train_reduced[-sampled_rows, ]
+
+save(unbalanced_train, file = paste(datasets_dir, "unbalanced_train.RData", sep = '/'))
+save(unbalanced_test, file = paste(datasets_dir, "unbalanced_test.RData", sep = '/'))
+
 # BALANCE THE DATASET ----------------------------------------------------------
 # and train/test split
 
