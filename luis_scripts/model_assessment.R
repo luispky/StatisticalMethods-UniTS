@@ -18,7 +18,6 @@ datasets_dir
 load(paste(datasets_dir, "train_data.RData", sep = "/"))
 load(paste(datasets_dir, "test_data.RData", sep = "/"))
 
-
 # FUNCTION TO PERFORM THE MODEL ASSESSMENT -------------------------------------
 models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_name = NULL, plot_cmatrix_name = NULL){
   # Predict probabilities
@@ -102,7 +101,8 @@ gam_all <- gam(Response ~ Gender + Driving_License + Previously_Insured +
 summary(gam_all)  
 
 # Performance Metrics: AUC-ROC, Accuracy and Confusion Matrix
-result <- models_assessment(gam_all, test_data, save_plots = TRUE, plot_auc_name = "ROCGAMAll", plot_cmatrix_name = "ConfusionMatrixGAMAll")
+# result <- models_assessment(gam_all, test_data, save_plots = TRUE, plot_auc_name = "ROCGAMAll", plot_cmatrix_name = "ConfusionMatrixGAMAll")
+result <- models_assessment(gam_all, test_data)
 
 # Accessing individual elements
 auc_score <- result[[1]]
