@@ -22,6 +22,9 @@ load(paste(datasets_dir, "train_data.RData", sep = "/"))
 load(paste(datasets_dir, "test_data.RData", sep = "/"))
 load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
 
+prop.table(table(train_reduced$Response))
+table(train_reduced$Response)
+
 numerical_variables <- names(train_reduced)[sapply(train_reduced, is.numeric)]
 categorical_variables <- names(train_reduced)[sapply(train_reduced, is.factor)]
 categorical_variables
