@@ -493,3 +493,8 @@ df_aic2
 # Assuming df is your DataFrame
 df_sorted2 <- df_aic2[order(df_aic2$AIC, decreasing=TRUE), ]
 df_sorted2
+
+#********************************************************
+#* INCLUDE anova ANALYSIS TO CHECK FOR SIGNIFICANT VARS *
+#* INCLUDE vif ANALYSIS TO CHECK FOR MULTICOLLINEARITY  *
+#******************************************************** 
