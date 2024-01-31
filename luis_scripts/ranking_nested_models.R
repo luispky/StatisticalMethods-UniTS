@@ -103,7 +103,10 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
   # Calculate precision
   precision <- conf_matrix[2, 2] / sum(conf_matrix[, 2])
 
-  return(list(auc_score, accuracy, tpr, fpr, tnr, fnr, precision, optimal_threshold))
+  return(list(auc_score = auc_score, accuracy = accuracy,
+              tpr = tpr, fpr = fpr, tnr = tnr, fnr = fnr,
+              precision = precision, optimal_threshold = optimal_threshold))
+
 }
 
 #*VARIABLES IMPORTANCE RANKING --------------------------------------------------
@@ -186,18 +189,19 @@ precision_values <- list()
 threshold_values <- list()
 
 for (i in 1:length(results_list)){
-  auc_values <- c(auc_values, as.numeric(results_list[[i]][1]))
-  accuracy_values <- c(accuracy_values, as.numeric(results_list[[i]][2]))
-  tpr_values <- c(tpr_values, as.numeric(results_list[[i]][3]))
-  fpr_values <- c(fpr_values, as.numeric(results_list[[i]][4]))
-  tnr_values <- c(tnr_values, as.numeric(results_list[[i]][5]))
-  fnr_values <- c(fnr_values, as.numeric(results_list[[i]][6]))
-  precision_values <- c(precision_values, as.numeric(results_list[[i]][7]))
-  threshold_values <- c(threshold_values, as.numeric(results_list[[i]][8]))
+  auc_values <- c(auc_values, as.numeric(results_list[[i]]$auc_score))
+  accuracy_values <- c(accuracy_values, as.numeric(results_list[[i]]$accuracy))
+  tpr_values <- c(tpr_values, as.numeric(results_list[[i]]$tpr))
+  fpr_values <- c(fpr_values, as.numeric(results_list[[i]]$fpr))
+  tnr_values <- c(tnr_values, as.numeric(results_list[[i]]$tnr))
+  fnr_values <- c(fnr_values, as.numeric(results_list[[i]]$fnr))
+  precision_values <- c(precision_values, as.numeric(results_list[[i]]$precision))
+  threshold_values <- c(threshold_values, as.numeric(results_list[[i]]$optimal_threshold))
 }
 
 result_df <- data.frame(
-  Variables_Order = unlist(variables_order),
+  Model_Name = df_ranking_nested_models_aic$Model_Name, 
+  AIC = df_ranking_nested_models_aic$AIC,
   AUC = unlist(auc_values),
   Accuracy = unlist(accuracy_values),
   TPR = unlist(tpr_values),
@@ -210,12 +214,9 @@ result_df <- data.frame(
 
 result_df
 
-df_sorted_ranking_nested_models_aic
-
-
 #* Perform ANOVA for each nested model------------------------------------------
 anova(unlist(nested_models))
-nested_models[[1]], nested_models[[2]],nested_models[[3]],...,nested_models[[n]]
+# nested_models[[1]], nested_models[[2]],nested_models[[3]],...,nested_models[[n]]
 
 #********************************************************
 #* INCLUDE vif ANALYSIS TO CHECK FOR MULTICOLLINEARITY  *
