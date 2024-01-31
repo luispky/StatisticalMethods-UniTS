@@ -9,6 +9,10 @@ editor_options:
   wrap: 72
 ---
 
+```{r}
+install.packages("htmltools")
+
+``` 
 
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
