@@ -1,15 +1,15 @@
 ---
-title: "Report"
+  title: "Report"
 author: "A. Gottardi, E. Corrolezzis, A. XYZ, L.F. Palacios Flores"
 output: 
   html_document:
-    toc: true
+  toc: true
 editor_options: 
   markdown: 
-    wrap: 72
+  wrap: 72
 ---
-
-```{r setup, include=FALSE}
+  
+  ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 # Check if libraries are already installed or install them if necessary
 if(!require(skimr)) install.packages("skimr")
@@ -42,91 +42,101 @@ The dataset contains the data of the clients of an Insurance company that has pr
 Our goal is to analyze the relationship between the features and the probability of the customers buying a vehichle insurance.
 Now, in order to predict whether the customer would be interested in Vehicle insurance, we have information about demographics (gender, age, region code type), Vehicles (Vehicle Age, Damage), Policy (Premium, sourcing channel) etc.
 
+Our client is an Insurance company that has provided Health Insurance to its customers. Now they need the help in building a model to predict whether the policyholders (customers) from the past year will also be interested in Vehicle Insurance provided by the company.
+
+An insurance policy is an arrangement by which a company undertakes to provide a guarantee of compensation for specified loss, damage, illness, or death in return for the payment of a specified premium. A premium is a sum of money that the customer needs to pay regularly to an insurance company for this guarantee.
+
+Building a model to predict whether a customer would be interested in Vehicle Insurance is extremely helpful for the company because it can then accordingly plan its communication strategy to reach out to those customers and optimize its business model and revenue.
+
 ```
 
 ```
 
 ## Exploratory data analysis
 The first step is trying to get some insights about the dataset by plotting and analysing the data. We present the barplots for the categorical variables and the histograms for the numerical ones.
-```
-# codice barplots 
-# codice 
-
-response_counts <- table(train_df$Response)
-response_props <- round(prop.table(response_counts) * 100, 2)
-
-# Create a data frame for the pie chart
-pie_data <- data.frame(
-  Response = factor(names(response_counts), labels = c("No", "Yes")),
-  Count = as.numeric(response_counts),
-  Label = paste0(response_props, "%")
-)
-p0 <- ggplot(pie_data, aes(x = "", y = Count, fill = Response)) +
-  geom_bar(stat = "identity", width = 1) +
-  coord_polar("y", start = 0) +
-  labs(x = "", y = "", fill = "Interest in Car Insurance") +
-  theme_void() +
-  theme(
-    legend.position = "bottom",
-    legend.text = element_text(size = 15),
-    legend.title = element_text(size = 15), 
-    text = element_text(size = 15)
-  ) +
-  geom_text(
-    aes(y = Count / 2, label = Label),
-    position = position_stack(vjust = 0.8),
-    size = 8
-  ) +
-  scale_fill_discrete(labels = c("No", "Yes"))
-p0
-
+```{r, fig.width=15, fig.height=15}
 p2 <- ggpairs(train_df, 
               columns = c("Age", "Annual_Premium", "Vintage"),
               aes(color = Response),
               diag = list(discrete="barDiag", 
-                continuous = wrap("densityDiag", alpha=0.7)))
+                          continuous = wrap("densityDiag", alpha=0.7)))
 p2
 ```
+The distribution of the Age variable with respect to the Response variable shows that the majority of the customers who are interested in car insurance are middle-aged (between 30 and 60 years old), which coindicdes with the age people are more likely to own a car. 
+The customers not interested in acquiring a car insurance policy are mostly distributed among yourger people and some middle-aged adults in their 50s. The distribution is slightly skewed to the right.
+
+The histogram for Annual Premium suggest that the costs of the car insurance policy is independent of the interest if the customers to buy the product. It has a highly right-skewed distribution, with most of the data concentrated on the lower end of the premium scale and a long tail extending to higher premium values. The lower tail shows a high values as a consequence of entry level health insurance policy as expected. 
+
+The histogram for Vintage shows a nearly uniform distribution, with a slight increase in frequency towards the middle range of the Vintage variable.
+
+The variables show negligible linear correlation between them, which is clearly shown in the scatter plot and in the correlation coeffcients.
 
 
-```{r}
-names = colnames(train_df)[! (colnames(train_df) %in% c("id", "Age", "Region_Code", "Annual_Premium", "Policy_Sales_Channel", "Vintage")) ]
-names2 <- colnames(train_df)[(colnames(train_df) %in% c("Age", "Region_Code", "Policy_Sales_Channel", "Vintage")) ]
-# function to create the simplest 
-simple_bars <- function(data, names){
-  plot_list <- list()
-# Iterate through the columns of the data frame
-  for (col_name in colnames(data)) {
-    
-    # Create a bar plot for the current column
-    bar_plot <- ggplot(data, aes(x = !!sym(col_name), fill = "Blue")) +
-      geom_bar(color = "black", size = 0.2) +
-      labs(title = paste("Barplot of", col_name),
-           x = col_name,
-           y = "") +
-      scale_fill_manual(values = c("Blue" = "lightblue"))
-    
-    # Append the bar plot to the list
-    plot_list[[col_name]] <- bar_plot
-  }
-  return(plot_list)
-}
-plots <- simple_bars(train_df, names)
-grid.arrange(grobs = plots, nrow = 2, ncol=3)
+```{r, fig.width=15, fig.height=9}
+p9 <- ggplot(train_df, aes(x = Region_Code, fill = Response)) + 
+  geom_bar(position = "dodge", color = "black") +
+  labs(y = "Count", fill = "Response") +
+  scale_x_discrete(breaks = function(x) x[seq(1, length(x), by = 10)]) +
+  theme(
+    text = element_text(size = 12),
+    axis.text = element_text(size = 14)
+  )
 
+
+p14 <- ggplot(train_df, aes(x = Policy_Sales_Channel, fill = Response)) + 
+  geom_bar(position = "dodge", color = "black") +
+  labs(y = "Count", fill = "Response") +
+  scale_x_discrete(breaks = function(x) x[seq(1, length(x), by = 20)]) +
+  theme(
+    text = element_text(size = 12),
+    axis.text = element_text(size = 14)
+  )
+p_cat <- p9 + p14
+p_cat
 ```
+
 
 Compute skim. We observe that there are not missing values and that the Response variable has an inbalance rate of 7.15 (put code) so we don't need to act to fix that.
 Also the id value doesn't seem significant, since it is uniform and it is just a customer identifier. So we decided to exclude it from the training. 
 
+The vast majority of the customers are from region 28. The customers from region 28 are also the ones who are most interested in car insurance. 
+Almost half of the customers are distributed among regions 8, 28, 41, 46 accounting for ~47% of the total customers.
+The customers of all the other regions account for almost the same amount of interested customers as the customers from region 28.
+
+The vast majority of the customers where contacted from channel 152. However, the rest of the channels are more likely to be interested in the car insurance product. Channels 26, 124, 152 and 160 alone account for more than 80% of the customers. Channels 26 and 124 are the ones with the highest percentage of customers interested in the product. Abut 20% of the customers interested in the product are distributed in the rest of the channels of outreach. Channel 160 is the one with the lowest percentage of customers interested in the product.
+
+*Since the two categorical variables have a high number of levels and the majority of the categories have small fequency, we decided to group them toghether: we maintained the 4 most frequent categories and grouped the other in a 5 category.*
+  
+  
+  After the grouping:
+  ```{r}
+p10 <- ggplot(train_reduced, aes(x = Region_Reduced, fill = Response)) + 
+  geom_bar(position = "dodge", color = "black") +
+  labs(y = "Count", fill = "Response") +
+  theme(
+    text = element_text(size = 12),
+    axis.text = element_text(size = 14)
+  ) + 
+  guides(fill = FALSE)
+p15 <- ggplot(train_reduced, aes(x = Channels_Reduced, fill = Response)) + 
+  geom_bar(position = "dodge", color = "black") +
+  labs(y = "Count", fill = "Response") +
+  theme(
+    text = element_text(size = 12),
+    axis.text = element_text(size = 14)
+  ) + 
+  guides(fill = FALSE)
+p10+p15
+```
+
+*Train/test divison* We have divided the original dataset into a train and test dataset according to a 70% split. Also we deleted the non reduced version of the variables.
 
 
-
-## feature engineering
-
-
+Approach:
+  - create a ranking of the variables
 
 ## glm
+
 ### training
 ### testing
 ### comparison

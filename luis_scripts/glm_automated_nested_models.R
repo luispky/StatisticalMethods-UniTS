@@ -14,6 +14,7 @@ current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
 datasets_dir <- paste(current_path,"../datasets", sep = "/")
 datasets_dir
 
+
 # load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
 load(paste(datasets_dir, "train_data.RData", sep = "/"))
 load(paste(datasets_dir, "test_data.RData", sep = "/"))
@@ -25,21 +26,7 @@ test_data <- select(test_data, -Policy_Sales_Channel, -Region_Code)
 #*--------------------------------------------------------------------
 
 # * This function assumes that `Policy_Sales_Channel` and `Region_Code` have been removed from the data
-ranking_nested_models <- function(train_data, test_data, use_model = "glm", use_log = TRUE, use_splines = FALSE) {
-  if(use_model == "glm" && use_log == TRUE){
-    numeric_variables <- c("I(log(Age))", "I(log(Annual_Premium))")
-  } else if (use_model == "glm" && use_log == FALSE){
-    numeric_variables <- c("Age", "Annual_Premium")
-  } else if (use_model == "gam" && use_log == TRUE && use_splines == TRUE){
-    numeric_variables <- c("s(I(log(Age)))", "s(I(log(Annual_Premium)))")
-  } else if (use_model == "gam" && use_log == TRUE && use_splines == FALSE){
-    numeric_variables <- c("I(log(Age))", "I(log(Annual_Premium))")
-  } else if (use_model == "gam" && use_log == FALSE && use_splines == TRUE){
-    numeric_variables <- c("s(Age)", "s(Annual_Premium)")
-  } else if (use_model == "gam" && use_log == FALSE && use_splines == FALSE){
-    numeric_variables <- c("Age", "Annual_Premium")
-  }
-
+ranking_nested_models_gml <- function(train_data, test_data) {
   #*VARIABLES IMPORTANCE RANKING --------------------------------------------------
 
   # Sort variables by importance wrt AIC
@@ -48,26 +35,17 @@ ranking_nested_models <- function(train_data, test_data, use_model = "glm", use_
   predictors <- colnames(train_data)
   predictors <- predictors[predictors != 'Response']
   ranking_variables_models <- list()
-  sum_variables <- paste(predictors, collapse = " + ")
 
   for (predictor in predictors){
     if (predictor == "Age"){
-      formula_string <- paste("Response ~", sum_variables ,"- Annual_Premium -", predictor, "+", numeric_variables[2])
-
+      formula_string <- paste("Response ~ . - Annual_Premium + I(log(Annual_Premium)) -", predictor)
     } else if (predictor == "Annual_Premium"){
-      formula_string <- paste("Response ~", sum_variables ,"- Age -", predictor, "+", numeric_variables[1])
+      formula_string <- paste("Response ~ . - Age + I(log(Age)) -", predictor)
     } else {
-      formula_string <- paste("Response ~", sum_variables ,"- Age - Annual_Premium -", predictor, "+", paste(numeric_variables, collapse = " + "))
-
+      formula_string <- paste("Response ~ . - Age - Annual_Premium + I(log(Age)) + I(log(Annual_Premium)) -", predictor)
     }
     model_formula <- as.formula(formula_string)
-
-    if(use_model == "glm"){
-      model <- glm(model_formula, data = train_data, family = binomial)
-    } else if (use_model == "gam"){
-      model <- gam(model_formula, data = train_data, family = binomial)
-    }
-
+    model <- glm(model_formula, data = train_data, family = binomial)
     ranking_variables_models[[predictor]] <- model
   }
 
@@ -88,9 +66,9 @@ ranking_nested_models <- function(train_data, test_data, use_model = "glm", use_
 
   for (variable in variables_order) {
     if (variable == "Age"){
-      variables_nested <- c(variables_nested, numeric_variables[1])
+      variables_nested <- c(variables_nested, "I(log(Age))")
     } else if (variable == "Annual_Premium"){
-      variables_nested <- c(variables_nested, numeric_variables[2])
+      variables_nested <- c(variables_nested, "I(log(Annual_Premium))")
     } else {
       variables_nested <- c(variables_nested, variable)
     }
@@ -247,4 +225,4 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
 #*--------------------------------------------------------------------
 #*RUN THE MODEL
 
-result <- ranking_nested_models(train_data, test_data, use_model = "gam", use_log = TRUE, use_splines = TRUE)
+result <- ranking_nested_models_gml(train_data, test_data)
