@@ -102,7 +102,7 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
   # Calculate precision
   precision <- conf_matrix[2, 2] / sum(conf_matrix[, 2])
 
-  return(list(auc_score, accuracy, tpr, fpr, tnr, fnr, precision))
+  return(list(auc_score, accuracy, tpr, fpr, tnr, fnr, precision, optimal_threshold))
 }
 
 #*VARIABLES IMPORTANCE RANKING --------------------------------------------------
