@@ -8,7 +8,6 @@ library(skimr)
 library(pROC)
 library(caret)
 library(purrr)
-install.packages("caret")
 #*LOAD THE DATA-----------------------------------------------------------------
 # Define the path to the datasets
 current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
@@ -215,9 +214,15 @@ result_df <- data.frame(
 result_df
 
 #* Perform ANOVA for each nested model------------------------------------------
-anova(unlist(nested_models))
+# anova(unlist(nested_models))
 # nested_models[[1]], nested_models[[2]],nested_models[[3]],...,nested_models[[n]]
 
 #********************************************************
 #* INCLUDE vif ANALYSIS TO CHECK FOR MULTICOLLINEARITY  *
 #******************************************************** 
+
+model_performance(nested_models[[5]])
+
+
+install.packages("performance")
+library("performance")

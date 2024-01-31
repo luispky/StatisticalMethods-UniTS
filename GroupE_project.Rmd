@@ -1,5 +1,5 @@
 ---
-  title: "Report"
+title: "Report"
 author: "A. Gottardi, E. Corrolezzis, A. XYZ, L.F. Palacios Flores"
 output: 
   html_document:
@@ -8,31 +8,21 @@ editor_options:
   markdown: 
   wrap: 72
 ---
-  
-```{r setup, include=FALSE}
+
+
+```{r, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-# Check if libraries are already installed or install them if necessary
-if(!require(skimr)) install.packages("skimr")
-library(skimr)
-if(!require(ggplot2)) install.packages("ggplot2")
-library(ggplot2)
-if(!require(corrplot)) install.packages("corrplot")
-library(corrplot)
+library(patchwork); library(GGally); library(ggplot2); library(car); library(mgcv); library(skimr); library(viridis)
+library(psych); library(gridExtra); library(dplyr)
+```
 
-library(skimr)
-library(ggplot2)
-library(patchwork)
-library(GGally)
-library(ggplot2); library(car); library(mgcv); library(skimr); library(viridis)
-library(psych); library(gridExtra); library(dplyr); library(skimr)
-
-
-current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
-datasets_dir <- paste(current_path,"/datasets", sep = "/")
-
+```{r, include=FALSE}
+current_path <- getwd()
+datasets_dir <- file.path(current_path, "datasets")
 load(paste(datasets_dir, "train_df.RData", sep = "/"))
 load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
-df <- read.csv('datasets/train.csv')
+
+df <- read.csv(paste(datasets_dir, 'train.csv', sep = "/"))
 ```
 
 # "Doubt the data until the data leave no room for doubt." - Henri Poincaré
@@ -147,5 +137,3 @@ Approach:
 ## RF??
 
 ## Final conclusions
-
-
