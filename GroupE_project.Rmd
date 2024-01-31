@@ -18,7 +18,128 @@ if(!require(ggplot2)) install.packages("ggplot2")
 library(ggplot2)
 if(!require(corrplot)) install.packages("corrplot")
 library(corrplot)
+
+library(skimr)
+library(ggplot2)
+library(patchwork)
+library(GGally)
+library(ggplot2); library(car); library(mgcv); library(skimr); library(viridis)
+library(psych); library(gridExtra); library(dplyr); library(skimr)
+
+
+current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
+datasets_dir <- paste(current_path,"/datasets", sep = "/")
+
+load(paste(datasets_dir, "train_df.RData", sep = "/"))
+load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
+df <- read.csv('datasets/train.csv')
 ```
 
 # "Doubt the data until the data leave no room for doubt." - Henri Poincaré
+
+## Problem statement
+The dataset contains the data of the clients of an Insurance company that has provided Health Insurance. 
+Our goal is to analyze the relationship between the features and the probability of the customers buying a vehichle insurance.
+Now, in order to predict whether the customer would be interested in Vehicle insurance, we have information about demographics (gender, age, region code type), Vehicles (Vehicle Age, Damage), Policy (Premium, sourcing channel) etc.
+
+```
+
+```
+
+## Exploratory data analysis
+The first step is trying to get some insights about the dataset by plotting and analysing the data. We present the barplots for the categorical variables and the histograms for the numerical ones.
+```
+# codice barplots 
+# codice 
+
+response_counts <- table(train_df$Response)
+response_props <- round(prop.table(response_counts) * 100, 2)
+
+# Create a data frame for the pie chart
+pie_data <- data.frame(
+  Response = factor(names(response_counts), labels = c("No", "Yes")),
+  Count = as.numeric(response_counts),
+  Label = paste0(response_props, "%")
+)
+p0 <- ggplot(pie_data, aes(x = "", y = Count, fill = Response)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(x = "", y = "", fill = "Interest in Car Insurance") +
+  theme_void() +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 15),
+    legend.title = element_text(size = 15), 
+    text = element_text(size = 15)
+  ) +
+  geom_text(
+    aes(y = Count / 2, label = Label),
+    position = position_stack(vjust = 0.8),
+    size = 8
+  ) +
+  scale_fill_discrete(labels = c("No", "Yes"))
+p0
+
+p2 <- ggpairs(train_df, 
+              columns = c("Age", "Annual_Premium", "Vintage"),
+              aes(color = Response),
+              diag = list(discrete="barDiag", 
+                continuous = wrap("densityDiag", alpha=0.7)))
+p2
+```
+
+
+```{r}
+names = colnames(train_df)[! (colnames(train_df) %in% c("id", "Age", "Region_Code", "Annual_Premium", "Policy_Sales_Channel", "Vintage")) ]
+names2 <- colnames(train_df)[(colnames(train_df) %in% c("Age", "Region_Code", "Policy_Sales_Channel", "Vintage")) ]
+# function to create the simplest 
+simple_bars <- function(data, names){
+  plot_list <- list()
+# Iterate through the columns of the data frame
+  for (col_name in colnames(data)) {
+    
+    # Create a bar plot for the current column
+    bar_plot <- ggplot(data, aes(x = !!sym(col_name), fill = "Blue")) +
+      geom_bar(color = "black", size = 0.2) +
+      labs(title = paste("Barplot of", col_name),
+           x = col_name,
+           y = "") +
+      scale_fill_manual(values = c("Blue" = "lightblue"))
+    
+    # Append the bar plot to the list
+    plot_list[[col_name]] <- bar_plot
+  }
+  return(plot_list)
+}
+plots <- simple_bars(train_df, names)
+grid.arrange(grobs = plots, nrow = 2, ncol=3)
+
+```
+
+Compute skim. We observe that there are not missing values and that the Response variable has an inbalance rate of 7.15 (put code) so we don't need to act to fix that.
+Also the id value doesn't seem significant, since it is uniform and it is just a customer identifier. So we decided to exclude it from the training. 
+
+
+
+
+## feature engineering
+
+
+
+## glm
+### training
+### testing
+### comparison
+
+
+## gam
+### training
+### testing
+### comparison
+
+
+## RF??
+
+## Final conclusions
+
 
