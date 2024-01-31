@@ -1,6 +1,6 @@
 ---
 title: "Report"
-author: "A. Gottardi, E. Corrolezzis, A. XYZ, L.F. Palacios Flores"
+author: "A. Gottardi, E. Corrolezzis, A. Minutolo, L.F. Palacios Flores"
 output: 
   html_document:
   toc: true
