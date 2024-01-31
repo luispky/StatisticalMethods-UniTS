@@ -9,7 +9,7 @@ editor_options:
   wrap: 72
 ---
   
-  ```{r setup, include=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 # Check if libraries are already installed or install them if necessary
 if(!require(skimr)) install.packages("skimr")
@@ -47,10 +47,6 @@ Our client is an Insurance company that has provided Health Insurance to its cus
 An insurance policy is an arrangement by which a company undertakes to provide a guarantee of compensation for specified loss, damage, illness, or death in return for the payment of a specified premium. A premium is a sum of money that the customer needs to pay regularly to an insurance company for this guarantee.
 
 Building a model to predict whether a customer would be interested in Vehicle Insurance is extremely helpful for the company because it can then accordingly plan its communication strategy to reach out to those customers and optimize its business model and revenue.
-
-```
-
-```
 
 ## Exploratory data analysis
 The first step is trying to get some insights about the dataset by plotting and analysing the data. We present the barplots for the categorical variables and the histograms for the numerical ones.
@@ -109,7 +105,7 @@ The vast majority of the customers where contacted from channel 152. However, th
   
   
   After the grouping:
-  ```{r}
+```{r}
 p10 <- ggplot(train_reduced, aes(x = Region_Reduced, fill = Response)) + 
   geom_bar(position = "dodge", color = "black") +
   labs(y = "Count", fill = "Response") +
