@@ -8,12 +8,13 @@ library(skimr)
 library(pROC)
 library(caret)
 library(purrr)
-
+install.packages("caret")
 #*LOAD THE DATA-----------------------------------------------------------------
 # Define the path to the datasets
 current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
 datasets_dir <- paste(current_path,"../datasets", sep = "/")
 datasets_dir
+
 
 # load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
 load(paste(datasets_dir, "train_data.RData", sep = "/"))
@@ -102,7 +103,7 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
   # Calculate precision
   precision <- conf_matrix[2, 2] / sum(conf_matrix[, 2])
 
-  return(list(auc_score, accuracy, tpr, fpr, tnr, fnr, precision))
+  return(list(auc_score, accuracy, tpr, fpr, tnr, fnr, precision, optimal_threshold))
 }
 
 #*VARIABLES IMPORTANCE RANKING --------------------------------------------------
@@ -177,6 +178,13 @@ results_list <- map(nested_models, ~models_assessment(.x, test_data))
 # Compute AUC values
 auc_values <- list()
 accuracy_values <- list()
+tpr_values <- list()
+fpr_values <- list()
+tnr_values <- list()
+fnr_values <- list()
+precision_values <- list()
+threshold_values <- list()
+
 for (i in 1:length(results_list)){
   auc_values <- c(auc_values, as.numeric(results_list[[i]][1]))
   accuracy_values <- c(accuracy_values, as.numeric(results_list[[i]][2]))
@@ -185,6 +193,7 @@ for (i in 1:length(results_list)){
   tnr_values <- c(tnr_values, as.numeric(results_list[[i]][5]))
   fnr_values <- c(fnr_values, as.numeric(results_list[[i]][6]))
   precision_values <- c(precision_values, as.numeric(results_list[[i]][7]))
+  threshold_values <- c(threshold_values, as.numeric(results_list[[i]][8]))
 }
 
 result_df <- data.frame(
@@ -195,13 +204,18 @@ result_df <- data.frame(
   FPR = unlist(fpr_values),
   TNR = unlist(tnr_values),
   FNR = unlist(fnr_values),
-  Precision = unlist(precision_values)
+  Precision = unlist(precision_values),
+  Threshold = unlist(threshold_values)
 )
 
 result_df
 
+df_sorted_ranking_nested_models_aic
+
+
 #* Perform ANOVA for each nested model------------------------------------------
 anova(unlist(nested_models))
+nested_models[[1]], nested_models[[2]],nested_models[[3]],...,nested_models[[n]]
 
 #********************************************************
 #* INCLUDE vif ANALYSIS TO CHECK FOR MULTICOLLINEARITY  *
