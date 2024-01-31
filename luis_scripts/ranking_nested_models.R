@@ -221,8 +221,39 @@ result_df
 #* INCLUDE vif ANALYSIS TO CHECK FOR MULTICOLLINEARITY  *
 #******************************************************** 
 
-model_performance(nested_models[[5]])
-
-
 install.packages("performance")
 library("performance")
+
+
+model <- glm(Response ~ Previously_Insured + Vehicle_Damage + Channels_Reduced + Vehicle_Age + Region_Reduced, 
+             data = train_data, family = "binomial")
+
+summary(model)
+
+res <- binned_residuals(model)
+
+library(arm)
+
+# Get predicted values from the model
+predicted_values <- predict(model, test_data, type = "response")
+
+# Calculate residuals
+residuals <- residuals(model, type = "deviance")
+
+# Use binned.resids function
+binned_residuals <- binned.resids(predicted_values, residuals, nclass = 10)
+
+# Print binned residuals
+print(binned_residuals)
+
+str(binned_residuals)
+
+# Plot binned residuals
+plot(
+  binned_residuals$binned[, "xbar"],
+  binned_residuals$binned[, "ybar"],
+  type = "o",  # 'o' for connecting points with lines
+  xlab = "Predicted Values",
+  ylab = "Average Residual",
+  main = "Binned Residual Plot"
+)

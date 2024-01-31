@@ -65,7 +65,9 @@ ranking_nested_models <- function(train_data, test_data, use_model = "glm", use_
     if(use_model == "glm"){
       model <- glm(model_formula, data = train_data, family = binomial)
     } else if (use_model == "gam"){
-      model <- gam(model_formula, data = train_data, family = binomial)
+      model <- gam(model_formula, data = train_data, 
+                  family = binomial(), 
+                  optimizer = 'efs', select = TRUE)
     }
 
     ranking_variables_models[[predictor]] <- model
@@ -100,7 +102,9 @@ ranking_nested_models <- function(train_data, test_data, use_model = "glm", use_
     if(use_model == "glm"){
       model <- glm(model_formula, data = train_data, family = binomial)
     } else if (use_model == "gam"){
-      model <- gam(model_formula, data = train_data, family = binomial)
+      model <- gam(model_formula, data = train_data, 
+                  family = binomial(), 
+                  optimizer = 'efs', select = TRUE)
     }
     
     nested_models[[variable]] <- model
