@@ -241,7 +241,7 @@ predicted_values <- predict(model, test_data, type = "response")
 residuals <- residuals(model, type = "deviance")
 
 # Use binned.resids function
-binned_residuals <- binned.resids(predicted_values, residuals, nclass = 10)
+binned_residuals <- binned.resids(predicted_values, residuals, nclass = 50)$binned
 
 # Print binned residuals
 print(binned_residuals)
@@ -250,10 +250,52 @@ str(binned_residuals)
 
 # Plot binned residuals
 plot(
-  binned_residuals$binned[, "xbar"],
-  binned_residuals$binned[, "ybar"],
-  type = "o",  # 'o' for connecting points with lines
-  xlab = "Predicted Values",
+  range(binned_residuals[, 1]),
+  range(binned_residuals[, 2], binned_residuals[, 6], -binned_residuals[, 6]),
+  type = "n",  
+  xlab = "Estimated Pr(Interest in Car Insurance)",
   ylab = "Average Residual",
-  main = "Binned Residual Plot"
+  main = "Binned Residual Plot",
+  # ylim = c(-2, 2)
 )
+abline(h = 0, col = "gray")
+points(binned_residuals[,1], binned_residuals[,2], type = "p", col = "blue")
+lines(binned_residuals[,1], binned_residuals[,6], type = "l", col = "blue")
+lines(binned_residuals[,1], -binned_residuals[,6], type = "l", col = "blue")
+
+# Analysis of Deviance Table:
+
+# Resid. Df (Residual Degrees of Freedom): Represents the degrees of freedom for the residuals in each model.
+
+# Resid. Dev (Residual Deviance): Measures the goodness of fit of the model. Smaller values indicate better fit.
+
+# Df (Degrees of Freedom): Represents the change in degrees of freedom when moving from one model to the next.
+
+# Deviance: Indicates the change in deviance between models. Larger values suggest a more significant difference.
+
+# Pr(>Chi) (p-value): The p-value associated with the likelihood ratio test (Chi-square test). It tests whether the additional variables in the current model significantly improve the fit compared to the previous model.
+
+
+# Assuming nested_models is a list of lm models
+library(car)  # For the vif function
+
+# Loop through each nested model
+for (i in 2:length(nested_models)) {
+  model <- nested_models[[i]]
+  
+  # Compute VIF for each predictor within the model
+  vif_values <- vif(model)
+  
+  # Print or store the VIF values for interpretation
+  print(vif_values)
+  
+  # Optionally, you can check if any VIF exceeds a threshold and take appropriate actions
+  high_vif_variables <- names(vif_values[vif_values > 10])
+  if (length(high_vif_variables) > 0) {
+    cat("High VIF variables in Model", i, ":", paste(high_vif_variables, collapse = ", "), "\n")
+  }
+}
+
+# anova(nested_models[[1]], nested_models[[2]], nested_models[[3]])
+
+anova(nested_models[[10]])

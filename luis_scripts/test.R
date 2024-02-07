@@ -240,3 +240,53 @@ legend("topright", legend = c("Column 1", "Column 2", "Column 6"), col = c("red"
 #   main = "Binned Residual Plot"
 # )
  
+
+
+
+
+
+
+#  Binned Residuals and Partial Residuals
+
+library(arm)
+
+# Get predicted values from the model
+predicted_values <- predict(model, test_data, type = "response")
+
+# Calculate residuals
+residuals <- residuals(model, type = "deviance")
+
+# Create partial residual plots for each predictor variable
+par(mfrow = c(2, 2))  # Adjust the layout based on the number of predictor variables
+
+for (var in colnames(test_data)) {
+  if (var != "response") {
+    partial_residuals <- residuals(model, type = "partial", terms = var)
+    
+    # Plot partial residuals
+    plot(
+      test_data[[var]], 
+      partial_residuals,
+      type = "p",
+      xlab = var,
+      ylab = "Partial Residuals",
+      main = paste("Partial Residual Plot for", var)
+    )
+    
+    # Calculate and plot binned residuals
+    binned_residuals <- binned.resids(test_data[[var]], partial_residuals, nclass = 10)
+    
+    plot(
+      binned_residuals$binned[, "xbar"],
+      binned_residuals$binned[, "ybar"],
+      type = "p",
+      xlab = var,
+      ylab = "Average Residual",
+      main = paste("Binned Residual Plot for", var),
+      ylim = c(-2, 2)
+    )
+  }
+}
+
+# Reset plotting parameters
+par(mfrow = c(1, 1))
