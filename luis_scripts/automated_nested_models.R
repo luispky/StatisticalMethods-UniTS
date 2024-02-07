@@ -15,10 +15,10 @@ datasets_dir <- paste(current_path,"../datasets", sep = "/")
 datasets_dir
 
 # load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
-load(paste(datasets_dir, "train_data.RData", sep = "/"))
-load(paste(datasets_dir, "test_data.RData", sep = "/"))
-train_data <- select(train_data, -Policy_Sales_Channel, -Region_Code)
-test_data <- select(test_data, -Policy_Sales_Channel, -Region_Code)
+load(paste(datasets_dir, "unbalanced_train.RData", sep = "/"))
+load(paste(datasets_dir, "unbalanced_test.RData", sep = "/"))
+unbalanced_train <- select(unbalanced_train, -Policy_Sales_Channel, -Region_Code)
+unbalanced_test <- select(unbalanced_test, -Policy_Sales_Channel, -Region_Code)
 
 #*--------------------------------------------------------------------
 #*FUNCTIONS 
@@ -256,5 +256,6 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
 #*--------------------------------------------------------------------
 #*RUN THE MODEL
 
-result <- ranking_nested_models(train_data, test_data, use_model = "glm", use_log = TRUE, use_splines = FALSE)
+result <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = TRUE, use_splines = FALSE)
 
+result

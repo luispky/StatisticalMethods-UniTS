@@ -14,12 +14,13 @@ current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
 datasets_dir <- paste(current_path,"../datasets", sep = "/")
 datasets_dir
 
+load(paste(datasets_dir, "unbalanced_train.RData", sep = "/"))
+load(paste(datasets_dir, "unbalanced_test.RData", sep = "/"))
+unbalanced_train <- select(unbalanced_train, -Policy_Sales_Channel, -Region_Code)
+unbalanced_test <- select(unbalanced_test, -Policy_Sales_Channel, -Region_Code)
+train_data <- unbalanced_train
+test_data <- unbalanced_test 
 
-# load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
-load(paste(datasets_dir, "train_data.RData", sep = "/"))
-load(paste(datasets_dir, "test_data.RData", sep = "/"))
-train_data <- select(train_data, -Policy_Sales_Channel, -Region_Code)
-test_data <- select(test_data, -Policy_Sales_Channel, -Region_Code)
 
 #*FUNCTION TO PERFORM THE MODEL ASSESSMENT -------------------------------------
 models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_name = NULL, plot_cmatrix_name = NULL){
@@ -119,11 +120,11 @@ ranking_variables_models <- list()
 
 for (predictor in predictors){
   if (predictor == "Age"){
-    formula_string <- paste("Response ~ . - Annual_Premium + I(log(Annual_Premium)) -", predictor)
+    formula_string <- paste("Response ~ . - Annual_Premium + I(Annual_Premium) -", predictor)
   } else if (predictor == "Annual_Premium"){
-    formula_string <- paste("Response ~ . - Age + I(log(Age)) -", predictor)
+    formula_string <- paste("Response ~ . - Age + I(Age) -", predictor)
   } else {
-    formula_string <- paste("Response ~ . - Age - Annual_Premium + I(log(Age)) + I(log(Annual_Premium)) -", predictor)
+    formula_string <- paste("Response ~ . - Age - Annual_Premium + I(Age) + I(Annual_Premium) -", predictor)
   }
   model_formula <- as.formula(formula_string)
   model <- glm(model_formula, data = train_data, family = binomial)
@@ -147,9 +148,9 @@ nested_models <- list()
 
 for (variable in variables_order) {
   if (variable == "Age"){
-    variables_nested <- c(variables_nested, "I(log(Age))")
+    variables_nested <- c(variables_nested, "I(Age)")
   } else if (variable == "Annual_Premium"){
-    variables_nested <- c(variables_nested, "I(log(Annual_Premium))")
+    variables_nested <- c(variables_nested, "I(Annual_Premium)")
   } else {
     variables_nested <- c(variables_nested, variable)
   }
