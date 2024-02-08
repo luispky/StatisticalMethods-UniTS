@@ -14,12 +14,13 @@ current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
 datasets_dir <- paste(current_path,"../datasets", sep = "/")
 datasets_dir
 
+load(paste(datasets_dir, "unbalanced_train.RData", sep = "/"))
+load(paste(datasets_dir, "unbalanced_test.RData", sep = "/"))
+unbalanced_train <- select(unbalanced_train, -Policy_Sales_Channel, -Region_Code)
+unbalanced_test <- select(unbalanced_test, -Policy_Sales_Channel, -Region_Code)
+train_data <- unbalanced_train
+test_data <- unbalanced_test 
 
-# load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
-load(paste(datasets_dir, "train_data.RData", sep = "/"))
-load(paste(datasets_dir, "test_data.RData", sep = "/"))
-train_data <- select(train_data, -Policy_Sales_Channel, -Region_Code)
-test_data <- select(test_data, -Policy_Sales_Channel, -Region_Code)
 
 #*FUNCTION TO PERFORM THE MODEL ASSESSMENT -------------------------------------
 models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_name = NULL, plot_cmatrix_name = NULL){
@@ -119,11 +120,11 @@ ranking_variables_models <- list()
 
 for (predictor in predictors){
   if (predictor == "Age"){
-    formula_string <- paste("Response ~ . - Annual_Premium + I(log(Annual_Premium)) -", predictor)
+    formula_string <- paste("Response ~ . - Annual_Premium + I(Annual_Premium) -", predictor)
   } else if (predictor == "Annual_Premium"){
-    formula_string <- paste("Response ~ . - Age + I(log(Age)) -", predictor)
+    formula_string <- paste("Response ~ . - Age + I(Age) -", predictor)
   } else {
-    formula_string <- paste("Response ~ . - Age - Annual_Premium + I(log(Age)) + I(log(Annual_Premium)) -", predictor)
+    formula_string <- paste("Response ~ . - Age - Annual_Premium + I(Age) + I(Annual_Premium) -", predictor)
   }
   model_formula <- as.formula(formula_string)
   model <- glm(model_formula, data = train_data, family = binomial)
@@ -147,9 +148,9 @@ nested_models <- list()
 
 for (variable in variables_order) {
   if (variable == "Age"){
-    variables_nested <- c(variables_nested, "I(log(Age))")
+    variables_nested <- c(variables_nested, "I(Age)")
   } else if (variable == "Annual_Premium"){
-    variables_nested <- c(variables_nested, "I(log(Annual_Premium))")
+    variables_nested <- c(variables_nested, "I(Annual_Premium)")
   } else {
     variables_nested <- c(variables_nested, variable)
   }
@@ -241,7 +242,7 @@ predicted_values <- predict(model, test_data, type = "response")
 residuals <- residuals(model, type = "deviance")
 
 # Use binned.resids function
-binned_residuals <- binned.resids(predicted_values, residuals, nclass = 10)
+binned_residuals <- binned.resids(predicted_values, residuals, nclass = 50)$binned
 
 # Print binned residuals
 print(binned_residuals)
@@ -250,10 +251,52 @@ str(binned_residuals)
 
 # Plot binned residuals
 plot(
-  binned_residuals$binned[, "xbar"],
-  binned_residuals$binned[, "ybar"],
-  type = "o",  # 'o' for connecting points with lines
-  xlab = "Predicted Values",
+  range(binned_residuals[, 1]),
+  range(binned_residuals[, 2], binned_residuals[, 6], -binned_residuals[, 6]),
+  type = "n",  
+  xlab = "Estimated Pr(Interest in Car Insurance)",
   ylab = "Average Residual",
-  main = "Binned Residual Plot"
+  main = "Binned Residual Plot",
+  # ylim = c(-2, 2)
 )
+abline(h = 0, col = "gray")
+points(binned_residuals[,1], binned_residuals[,2], type = "p", col = "blue")
+lines(binned_residuals[,1], binned_residuals[,6], type = "l", col = "blue")
+lines(binned_residuals[,1], -binned_residuals[,6], type = "l", col = "blue")
+
+# Analysis of Deviance Table:
+
+# Resid. Df (Residual Degrees of Freedom): Represents the degrees of freedom for the residuals in each model.
+
+# Resid. Dev (Residual Deviance): Measures the goodness of fit of the model. Smaller values indicate better fit.
+
+# Df (Degrees of Freedom): Represents the change in degrees of freedom when moving from one model to the next.
+
+# Deviance: Indicates the change in deviance between models. Larger values suggest a more significant difference.
+
+# Pr(>Chi) (p-value): The p-value associated with the likelihood ratio test (Chi-square test). It tests whether the additional variables in the current model significantly improve the fit compared to the previous model.
+
+
+# Assuming nested_models is a list of lm models
+library(car)  # For the vif function
+
+# Loop through each nested model
+for (i in 2:length(nested_models)) {
+  model <- nested_models[[i]]
+  
+  # Compute VIF for each predictor within the model
+  vif_values <- vif(model)
+  
+  # Print or store the VIF values for interpretation
+  print(vif_values)
+  
+  # Optionally, you can check if any VIF exceeds a threshold and take appropriate actions
+  high_vif_variables <- names(vif_values[vif_values > 10])
+  if (length(high_vif_variables) > 0) {
+    cat("High VIF variables in Model", i, ":", paste(high_vif_variables, collapse = ", "), "\n")
+  }
+}
+
+# anova(nested_models[[1]], nested_models[[2]], nested_models[[3]])
+
+anova(nested_models[[10]])

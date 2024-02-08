@@ -226,3 +226,4 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
 #*RUN THE MODEL
 
 result <- ranking_nested_models_gml(train_data, test_data)
+result
