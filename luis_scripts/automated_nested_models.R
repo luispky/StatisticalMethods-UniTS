@@ -162,7 +162,7 @@ ranking_nested_models <- function(train_data, test_data, use_model = "glm", use_
   )
 
   # Return ranking of variables and results
-  return(list(Ranking_Variables = df_sorted_ranking_variables_aic, Results = result_df))
+  return(list(Ranking_Variables = df_sorted_ranking_variables_aic, Results = result_df, Models = df_sorted_ranking_nested_models_aic))
 
 }
 
