@@ -53,38 +53,38 @@ plot(gam_sampled, 5)
 # Check for patterns in residuals against smoothed predictors.
 
 
-# plot(gam_sampled, pages=1, scheme=1, unconditional=TRUE)
-# plot(gam_sampled, pages=1, scheme=2)
-# plot(gam_sampled, pages=1, residuals=TRUE)
-# plot(gam_sampled, pages=2, residuals=TRUE)
-# plot(gam_sampled, pages=1,seWithMean=TRUE)
+plot(gam_sampled, pages=1, scheme=1, unconditional=TRUE)
+plot(gam_sampled, pages=1, scheme=2)
+plot(gam_sampled, pages=1, residuals=TRUE)
+plot(gam_sampled, pages=2, residuals=TRUE)
+plot(gam_sampled, pages=1,seWithMean=TRUE)
 
-# # What does the p-value mean here?
-# gam.check(gam_sampled)
+# What does the p-value mean here?
+gam.check(gam_sampled)
 
-# gam_sampledViz <- getViz(gam_sampled)
-# print(plot(gam_sampledViz, allTerms = T), pages = 1)
-# plot(gam_sampledViz)
+gam_sampledViz <- getViz(gam_sampled)
+print(plot(gam_sampledViz, allTerms = T), pages = 1)
+plot(gam_sampledViz)
 
-# pl <- plot(gam_sampledViz, allTerms = T) + l_points() + l_fitLine(linetype = 3) + l_fitContour() + 
-#       l_ciLine(colour = 2) + l_ciBar() + l_fitPoints(size = 1, col = 2) + theme_get() + labs(title = NULL) #+ 
-#       # l_dens(type = "cond")
-# print(pl, pages = 1)
+pl <- plot(gam_sampledViz, allTerms = T) + l_points() + l_fitLine(linetype = 3) + l_fitContour() + 
+      l_ciLine(colour = 2) + l_ciBar() + l_fitPoints(size = 1, col = 2) + theme_get() + labs(title = NULL) #+ 
+      # l_dens(type = "cond")
+print(pl, pages = 1)
 
-# # What does the p-value mean here?
-# check(gam_sampledViz)
+# What does the p-value mean here?
+check(gam_sampledViz)
 
-# gam_sampledViz <- getViz(gam_sampled, nsim=100)
-# gridPrint(check1D(gam_sampledViz, "log(Age)") + l_gridCheck1D(gridFun = sd, showReps = TRUE), 
-#           check1D(gam_sampledViz, "Annual_Premium") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-#           check1D(gam_sampledViz, "Gender") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-#           check1D(gam_sampledViz, "Driving_License") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-#           check1D(gam_sampledViz, "Previously_Insured") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-#           check1D(gam_sampledViz, "Vehicle_Damage") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-#           check1D(gam_sampledViz, "Channels_Reduced") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-#           check1D(gam_sampledViz, "Region_Reduced") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
-#           check1D(gam_sampledViz, "Vehicle_Age") + l_gridCheck1D(gridFun = sd, showReps = TRUE)
-# )
+gam_sampledViz <- getViz(gam_sampled, nsim=100)
+gridPrint(check1D(gam_sampledViz, "log(Age)") + l_gridCheck1D(gridFun = sd, showReps = TRUE), 
+          check1D(gam_sampledViz, "Annual_Premium") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Gender") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Driving_License") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Previously_Insured") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Vehicle_Damage") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Channels_Reduced") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Region_Reduced") + l_gridCheck1D(gridFun = sd, showReps = TRUE),
+          check1D(gam_sampledViz, "Vehicle_Age") + l_gridCheck1D(gridFun = sd, showReps = TRUE)
+)
 
 
 # The Variance Inflation Factor (VIF) is used to measure the degree of multicollinearity among the predictor variables in a regression model. High VIF values indicate that the variables may be highly correlated, leading to unstable and unreliable estimates of the regression coefficients.
@@ -290,3 +290,36 @@ for (var in colnames(test_data)) {
 
 # Reset plotting parameters
 par(mfrow = c(1, 1))
+
+
+
+library(arm)
+
+# Get predicted values from the model
+predicted_values <- predict(model, test_data, type = "response")
+
+# Calculate residuals
+residuals <- residuals(model, type = "deviance")
+
+# Use binned.resids function
+binned_residuals <- binned.resids(predicted_values, residuals, nclass = 50)$binned
+
+# Print binned residuals
+print(binned_residuals)
+
+str(binned_residuals)
+
+# Plot binned residuals
+plot(
+  range(binned_residuals[, 1]),
+  range(binned_residuals[, 2], binned_residuals[, 6], -binned_residuals[, 6]),
+  type = "n",  
+  xlab = "Estimated Pr(Interest in Car Insurance)",
+  ylab = "Average Residual",
+  main = "Binned Residual Plot",
+  # ylim = c(-2, 2)
+)
+abline(h = 0, col = "gray")
+points(binned_residuals[,1], binned_residuals[,2], type = "p", col = "blue")
+lines(binned_residuals[,1], binned_residuals[,6], type = "l", col = "blue")
+lines(binned_residuals[,1], -binned_residuals[,6], type = "l", col = "blue")
