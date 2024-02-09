@@ -535,8 +535,123 @@ Anova(result$Models$Region_Reduced, result$Models$Driving_License)
 ### The best overall
 ---plots of the gcVIZ library---
 
+
+```{r}
+# select the commands that actually convey relevant information
+gam_sampledViz <- getViz(gam_sampled)
+print(plot(gam_sampledViz, allTerms = T), pages = 1)
+plot(gam_sampledViz)
+
+pl <- plot(gam_sampledViz, allTerms = T) + l_points() + l_fitLine(linetype = 3) + l_fitContour() + 
+      l_ciLine(colour = 2) + l_ciBar() + l_fitPoints(size = 1, col = 2) + theme_get() + labs(title = NULL) #+ 
+      # l_dens(type = "cond")
+print(pl, pages = 1)
+```
+
 #### Binned residuals, VIF, Anova
 ---for anova and vif we only need to compute that for the best model or the full model---
+
+Select one of the two blocks of code below
+
+```{r}
+library(arm)
+
+# Get predicted values from the model
+predicted_values <- predict(model, test_data, type = "response")
+
+# Calculate residuals
+residuals <- residuals(model, type = "deviance")
+
+# Create partial residual plots for each predictor variable
+par(mfrow = c(2, 2))  # Adjust the layout based on the number of predictor variables
+
+for (var in colnames(test_data)) {
+  if (var != "response") {
+    partial_residuals <- residuals(model, type = "partial", terms = var)
+    
+    # Plot partial residuals
+    plot(
+      test_data[[var]], 
+      partial_residuals,
+      type = "p",
+      xlab = var,
+      ylab = "Partial Residuals",
+      main = paste("Partial Residual Plot for", var)
+    )
+    
+    # Calculate and plot binned residuals
+    binned_residuals <- binned.resids(test_data[[var]], partial_residuals, nclass = 10)
+    
+    plot(
+      binned_residuals$binned[, "xbar"],
+      binned_residuals$binned[, "ybar"],
+      type = "p",
+      xlab = var,
+      ylab = "Average Residual",
+      main = paste("Binned Residual Plot for", var),
+      ylim = c(-2, 2)
+    )
+  }
+}
+
+# Reset plotting parameters
+par(mfrow = c(1, 1))
+```
+
+or
+  
+```{r}
+library(arm)
+
+# Get predicted values from the model
+predicted_values <- predict(model, test_data, type = "response")
+
+# Calculate residuals
+residuals <- residuals(model, type = "deviance")
+
+# Use binned.resids function
+binned_residuals <- binned.resids(predicted_values, residuals, nclass = 50)$binned
+
+# Print binned residuals
+print(binned_residuals)
+
+str(binned_residuals)
+
+# Plot binned residuals
+plot(
+  range(binned_residuals[, 1]),
+  range(binned_residuals[, 2], binned_residuals[, 6], -binned_residuals[, 6]),
+  type = "n",  
+  xlab = "Estimated Pr(Interest in Car Insurance)",
+  ylab = "Average Residual",
+  main = "Binned Residual Plot",
+  # ylim = c(-2, 2)
+)
+abline(h = 0, col = "gray")
+points(binned_residuals[,1], binned_residuals[,2], type = "p", col = "blue")
+lines(binned_residuals[,1], binned_residuals[,6], type = "l", col = "blue")
+lines(binned_residuals[,1], -binned_residuals[,6], type = "l", col = "blue")
+
+```
+
+VIF
+  
+```{r}
+
+# Compute VIF
+vif_values <- vif(model)
+
+```
+
+Anova
+  
+```{r}
+
+# Perform ANOVA
+
+anova_values <- anova(model, test = "Chisq")
+
+```
 
 #### Coefficients
 
