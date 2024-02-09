@@ -161,8 +161,10 @@ ranking_nested_models <- function(train_data, test_data, use_model = "glm", use_
     Threshold = unlist(threshold_values)
   )
 
-  # Return ranking of variables and results
-  return(list(Ranking_Variables = df_sorted_ranking_variables_aic, Results = result_df, Models = df_sorted_ranking_nested_models_aic))
+  # Return ranking of variables, | dataframe
+  # results | dataframe
+  # and nested models | list
+  return(list(Ranking_Variables = df_sorted_ranking_variables_aic, Results = result_df, Models = nested_models))
 
 }
 
@@ -257,5 +259,3 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
 #*RUN THE MODEL
 
 result <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = TRUE, use_splines = FALSE)
-
-result
