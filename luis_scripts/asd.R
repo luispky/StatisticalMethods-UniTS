@@ -254,3 +254,55 @@ binned.resids <- function(x, y, nclass = sqrt(length(x))){
 result <- ranking_nested_models_gml(train_data, test_data)
 print(result$Result)
 ?sample
+
+?stepAIC
+
+# Drop columns Policy_Sales_Channel and Region_Code from unbalanced_train
+unbalanced_train <- unbalanced_train[, !names(unbalanced_train) %in% c("Policy_Sales_Channel", "Region_Code")]
+
+# Drop columns Policy_Sales_Channel and Region_Code from unbalanced_test
+unbalanced_test <- unbalanced_test[, !names(unbalanced_test) %in% c("Policy_Sales_Channel", "Region_Code")]
+
+# Load necessary library
+library(MASS)
+
+# Your initial full model
+full_model <- glm(Response ~ ., data = unbalanced_train, family = binomial)
+current_AIC <- AIC(full_model)
+threshold <- 30
+improvement <- Inf
+model_variables <- names(coef(full_model))[-1] # Exclude intercept
+
+while (length(model_variables) > 0 && improvement >= threshold) {
+  best_AIC <- Inf
+  best_model <- NULL
+  variable_to_remove <- NULL
+  
+  for (variable in model_variables) {
+    # Construct formula by excluding one variable at a time
+    formula <- as.formula(paste("Response ~", paste(setdiff(model_variables, variable), collapse = "+")))
+    temp_model <- glm(formula, data = unbalanced_train, family = binomial)
+    temp_AIC <- AIC(temp_model)
+    
+    if (temp_AIC < best_AIC) {
+      best_AIC <- temp_AIC
+      best_model <- temp_model
+      variable_to_remove <- variable
+    }
+  }
+  
+  improvement = current_AIC - best_AIC
+  if (improvement >= threshold && !is.null(best_model)) {
+    # Update current model and AIC
+    full_model <- best_model
+    current_AIC <- best_AIC
+    model_variables <- setdiff(model_variables, variable_to_remove) # Update variables list
+    cat("Removed:", variable_to_remove, "New AIC:", current_AIC, "\n")
+  } else {
+    break # Exit the loop if no improvement meets the threshold
+  }
+}
+
+cat("Final model variables:", paste(model_variables, collapse = ", "), "\n")
+cat("Final AIC:", current_AIC, "\n")
+

@@ -14,23 +14,23 @@ editor_options:
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(patchwork); library(GGally); library(ggplot2); library(car); library(mgcv); library(skimr); library(viridis)
-library(psych); library(gridExtra); library(dplyr)
+library(psych); library(gridExtra); library(dplyr); library(MASS)
 ```
 
 ```{r, include=FALSE}
 current_path <- getwd()
 datasets_dir <- file.path(current_path, "datasets")
-load(paste(datasets_dir, "train_df.RData", sep = "/"))
 load(paste(datasets_dir, "train_reduced.RData", sep = "/"))
-
-df <- read.csv(paste(datasets_dir, 'train.csv', sep = "/"))
+load(paste(datasets_dir, "unbalanced_train.RData", sep = "/"))
+load(paste(datasets_dir, "unbalanced_test.RData", sep = "/"))
 ```
+
 
 # "Doubt the data until the data leave no room for doubt." - Henri Poincaré
 
-## Problem statement
+# Problem statement
 The dataset contains the data of the clients of an Insurance company that has provided Health Insurance. 
-Our goal is to analyze the relationship between the features and the probability of the customers buying a vehichle insurance.
+Our goal is to analyze the relationship between the features and the probability of the customers buying a vehicle insurance.
 Now, in order to predict whether the customer would be interested in Vehicle insurance, we have information about demographics (gender, age, region code type), Vehicles (Vehicle Age, Damage), Policy ins(Premium, sourcing channel) etc.
 
 Our client is an Insurance company that has provided Health Insurance to its customers. Now they need the help in building a model to predict whether the policyholders (customers) from the past year will also be interested in Vehicle Insurance provided by the company.
@@ -39,30 +39,99 @@ An insurance policy is an arrangement by which a company undertakes to provide a
 
 Building a model to predict whether a customer would be interested in Vehicle Insurance is extremely helpful for the company because it can then accordingly plan its communication strategy to reach out to those customers and optimize its business model and revenue.
 
-## Exploratory data analysis
-#Numerical variables
-The first step is trying to get some insights about the dataset by plotting and analysing the data. We present the barplots for the categorical variables and the histograms for the numerical ones.
+# Data
+
+We had three datasets to analyze 'train.csv', 'test.csv' and 'sample.csv'. Among these datasets we only analyzed the first one. The 'test.csv' dataset lacked the 'Response' variable and the 'sample.csv' file contained observations of this variable but one for one category, making them unusable.
+
+Our dataset is composed of the following variables:
+
+| Variable            | Definition                                                                                       | Type   |
+|---------------------|--------------------------------------------------------------------------------------------------|--------|
+| id                  | Unique ID for the customer                                                                       | Numeric|
+| Gender              | Gender of the customer                                                                           | Categorical|
+| Age                 | Age of the customer                                                                              | Numeric|
+| Driving_License     | 0 : Customer does not have DL, 1 : Customer already has DL                                       | Binary |
+| Region_Code         | Unique code for the region of the customer                                                       | Categorical|
+| Previously_Insured  | 1 : Customer already has Vehicle Insurance, 0 : Customer doesn't have Vehicle Insurance         | Binary |
+| Vehicle_Age         | Age of the Vehicle                                                                               | Categorical|
+| Vehicle_Damage      | 1 : Customer got his/her vehicle damaged in the past. 0 : Customer didn't get his/her vehicle damaged in the past. | Binary |
+| Annual_Premium      | The amount customer needs to pay as premium in the year                                           | Numeric|
+| Policy_Sales_Channel| Anonymized Code for the channel of outreaching to the customer ie. Different Agents, Over Mail, Over Phone, In Person, etc. | Categorical|
+| Vintage             | Number of Days, Customer has been associated with the company                                     | Numeric|
+| Response            | 1 : Customer is interested, 0 : Customer is not interested                                       | Binary |
+
+The first step is trying to get some insights about the dataset by plotting and analyzing the data. We present the barplots for the categorical variables and the density plots for the numerical ones.
+
+The 'id' variable is just a discrete ordered variable with uniform distribution. Therefore, we just removed it from our analysis. 
+
+## Exploratory Data Analysis
+
+### 'Response' variable
+
+The proportion for the categories of the response variable are the following:
+
+```{r}
+# Pie chart of Response variable with percentages of the total observations. 
+# Calculate the percentages
+response_counts <- table(train_reduced$Response)
+response_props <- round(prop.table(response_counts) * 100, 2)
+
+# Create a data frame for the pie chart
+pie_data <- data.frame(
+  Response = factor(names(response_counts), labels = c("No", "Yes")),
+  Count = as.numeric(response_counts),
+  Label = paste0(response_props, "%")
+)
+
+# Create the pie chart
+p0 <- ggplot(pie_data, aes(x = "", y = Count, fill = Response)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(x = "", y = "", fill = "Interest in Car Insurance") +
+  theme_void() +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12), 
+    text = element_text(size = 12)
+  ) +
+  geom_text(
+    aes(y = Count / 2, label = Label),
+    position = position_stack(vjust = 0.9),
+    size = 8
+  ) +
+  scale_fill_discrete(labels = c("No", "Yes"))
+p0
+```
+
+As we can see the dataset is unbalanced and the imbalance ratio is: 
+```{r}
+props <- table(train_reduced$Response)
+IR<-as.numeric(props[1]/props[2])
+sprintf("IR: %f", IR)
+```
+This degree of imbalance is considered to be weak with respect to the reference level of 10 for slight imbalance, thus we decided to not perform any procedure to correct the imbalance.
+
+### Numerical variables
+
 ```{r, fig.width=15, fig.height=15}
-p2 <- ggpairs(train_df, 
+p2 <- ggpairs(train_reduced, 
               columns = c("Age", "Annual_Premium", "Vintage"),
               aes(color = Response),
               diag = list(discrete="barDiag", 
                           continuous = wrap("densityDiag", alpha=0.7)))
 p2
 ```
-The distribution of the Age variable with respect to the Response variable shows that the majority of the customers who are interested in car insurance are middle-aged (between 30 and 60 years old), which coindicdes with the age people are more likely to own a car. 
-The customers not interested in acquiring a car insurance policy are mostly distributed among yourger people and some middle-aged adults in their 50s. The ditributin is skewd to the right.
+The distribution of the Age variable with respect to the Response variable shows that the majority of the customers who are interested in car insurance are middle-aged (between 30 and 60 years old), which coincides with the age people are more likely to own a car. 
+The customers not interested in acquiring a car insurance policy are mostly distributed among younger people and some middle-aged adults in their 50s. The ditribution is skewed to the right.
 
 The plot for Annual Premium suggests that the costs of the car insurance policy is independent of the interest if the customers to buy the product. It has a highly right-skewed distribution, with most of the data concentrated on the lower end of the premium scale and a long tail extending to higher premium values. The lower tail shows a high values as a consequence of entry level health insurance policy as expected.
 
 Since both Age and Annual Premium are skewed to the right, we considered to apply a logarithm transformation for both the variables.
 ```{r, fig.width=15, fig.height=15}
-train_df$logAge <- log(train_df$Age)
-train_df$logAnnual_Premium <- log(train_df$Annual_Premium)
-colnames(train_df)
-sum(is.null(train_df$logAnnual_Premium))
-sum(is.na(train_df$logAnnual_Premium))
-p3 <- ggpairs(train_df, 
+train_reduced$logAge <- log(train_reduced$Age)
+train_reduced$logAnnual_Premium <- log(train_reduced$Annual_Premium)
+p3 <- ggpairs(train_reduced, 
               columns = c("logAge", "logAnnual_Premium"),
               aes(color = Response),
               diag = list(discrete="barDiag", 
@@ -74,10 +143,10 @@ The plot for Vintage shows a nearly uniform distribution, with a slight increase
 
 The variables show negligible linear correlation between them, which is clearly shown in the scatter plot and in the correlation coefficients.
 
-#Categorical variables
+### Categorical variables
 
 ```{r, fig.width=15, fig.height=9}
-p9 <- ggplot(train_df, aes(x = Region_Code, fill = Response)) + 
+p9 <- ggplot(train_reduced, aes(x = Region_Code, fill = Response)) + 
   geom_bar(position = "dodge", color = "black") +
   labs(y = "Count", fill = "Response") +
   scale_x_discrete(breaks = function(x) x[seq(1, length(x), by = 10)]) +
@@ -87,7 +156,7 @@ p9 <- ggplot(train_df, aes(x = Region_Code, fill = Response)) +
   )
 
 
-p14 <- ggplot(train_df, aes(x = Policy_Sales_Channel, fill = Response)) + 
+p14 <- ggplot(train_reduced, aes(x = Policy_Sales_Channel, fill = Response)) + 
   geom_bar(position = "dodge", color = "black") +
   labs(y = "Count", fill = "Response") +
   scale_x_discrete(breaks = function(x) x[seq(1, length(x), by = 20)]) +
@@ -126,20 +195,31 @@ p15 <- ggplot(train_reduced, aes(x = Channels_Reduced, fill = Response)) +
 p10+p15
 ```
 
+Gender...
+
+
+```{r}
+p7 <- ggplot(train_df, aes(x = Gender, fill = Response)) + 
+  geom_bar(position = "fill", color = "black") +
+  labs(y = "Percentage", fill = "Response") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  theme(
+    text = element_text(size = 12),
+    axis.text = element_text(size = 14)
+  ) +
+  guides(fill = FALSE)
+
+p7
+```
+
+
 The last categorical variable is ID, which we won't consider for models, since it is a simple identifier of the customers. Hence it doesn't give any more information about the Response.
 
+## MODELS
 
+After exploring the data, now we proceed with the fitting and assessment of different models for binary classification. For training and testing the models we performed a static train/test split with 70% of train set and 30% of test set.
 
-##Train/Test Data
-
-Among the datasets provided, the only usable one was train.csv, since test.csv dataset there was no observation saying that a customer was interested in car insurance. Hence, we made a static 
-test/train split on train.csv with 80% of train set and 20% of test set.
---add code for split??--
-
-##MODELS
-After exploring the data, now we proceed with the fitting and assessment of different models for binary classification.
-
-# glm
+### glm
 Il nostro scopo è capire quali variabili utilizzare e come utilizzarle.
 -nested models statico con assessment
 -stepAIC() con assessment
@@ -147,8 +227,38 @@ Il nostro scopo è capire quali variabili utilizzare e come utilizzarle.
 
 In order to understand which variables are more significant in the explanation of the response variable, we analyzed nested models with different combinations of selected explanatory variables.
 
-#forward selection
-The first approach consists of adding variables one by one, starting from an empty model and proceeding until all the variables considered in the model. 
+  
+###stepAIC
+
+The first approach we used consists of using the function stepAIC() from the MASS package to find the best combination of predictors with respect to AIC. The stepAIC() function must be applied to the full model, which serves as the starting point for the variable selection process. We chose the 'both' direction, that considers both adding and removing variables from the model.
+
+
+```{r}
+str(unbalanced_train)
+```
+
+
+```{r}
+# Drop columns Policy_Sales_Channel and Region_Code from unbalanced_train
+unbalanced_train <- unbalanced_train[, !names(unbalanced_train) %in% c("Policy_Sales_Channel", "Region_Code")]
+
+# Drop columns Policy_Sales_Channel and Region_Code from unbalanced_test
+unbalanced_test <- unbalanced_test[, !names(unbalanced_test) %in% c("Policy_Sales_Channel", "Region_Code")]
+```
+
+
+```{r}
+full_model <- glm(Response ~ ., data = unbalanced_train, family = binomial)
+stepAIC(full_model, direction = 'both')
+```
+Performing the stepAIC function we can see that, as previously said, the variable Vintage is not useful for the model, since its almost uniform distribution. The stepAIC function stops when the ranking of models built by removing and adding one variable at a time is not better than the default model. Hence, this procedure doesn't allow us to obtain a parsimonious model based on the Occam's razor. Consequentially we also implemented a procedure to obtain a reduced model based on idea of the stepAIC.
+
+This procedure builds a ranking of variables, similar to the one of the stepAIC, meaning creating models by removing one variable at a time and sorting the variables by AIC. After that, we built nested models by adding one variable at a time based on the ranking of variables mentioned before.  
+
+
+#### Nested models
+The first approach consists of adding variables one by one, starting from an empty model and proceeding until all the variables considered in the model.
+##Comparison and model selection
 
 ```{r, echo=FALSE, collapse=TRUE}
 library(mgcViz)
@@ -406,18 +516,13 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
 #*RUN THE MODEL
 
 ```
-```{r}
-(result <- ranking_nested_models(train_data, test_data, use_model = "glm", use_log = TRUE, use_splines = FALSE))
-```
- 
-#stepAIC
-The second approach consists of using the function stepAIC() from the MASS package to find the best combination of predictors with respect to AIC. The stepAIC() function must be applayed to the full model, which serves as the starting point for the variable selection process. We chose the 'both' direction, that considers both adding and removing variables from the model.
+
 
 ```{r}
-
+(result <- ranking_nested_models(train_data, test_data, use_model = "glm", use_log = FALSE, use_splines = FALSE))
 ```
 
-##Comparison and model selection
+
 
 
 ## gam
