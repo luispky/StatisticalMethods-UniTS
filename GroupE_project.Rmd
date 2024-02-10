@@ -232,10 +232,6 @@ In order to understand which variables are more significant in the explanation o
 The first approach we used consists of using the function stepAIC() from the MASS package to find the best combination of predictors with respect to AIC. The stepAIC() function must be applied to the full model, which serves as the starting point for the variable selection process. We chose the 'both' direction, that considers both adding and removing variables from the model.
 
 
-```{r}
-str(unbalanced_train)
-```
-
 
 ```{r}
 # Drop columns Policy_Sales_Channel and Region_Code from unbalanced_train
@@ -252,9 +248,9 @@ full_model <- glm(Response ~ Gender + log(Age) + Driving_License + Previously_In
     Channels_Reduced + Region_Reduced, data = unbalanced_train, family = binomial)
 stepAIC(full_model, direction = 'both')
 ```
-Performing the stepAIC function we can see that, as previously said, the variable Vintage is not useful for the model, since its almost uniform distribution. The stepAIC function stops when the ranking of models built by removing and adding one variable at a time is not better than the default model. Hence, this procedure doesn't allow us to obtain a parsimonious model based on the Occam's razor. Consequentially we also implemented a procedure to obtain a reduced model based on idea of the stepAIC.
+Performing the stepAIC function we can see that, as previously said, the variable Vintage is not useful for the model, since its almost uniform distribution. The stepAIC function stops when the ranking of models built by removing and adding one variable at a time has an AIC greater than the default model. Hence, this procedure doesn't allow us to obtain a simple model based on the Occam's razor. Consequentially we also implemented a procedure to obtain a reduced model based on idea of the stepAIC.
 
-This procedure builds a ranking of variables, similar to the one of the stepAIC, meaning creating models by removing one variable at a time and sorting the variables by AIC. After that, we built nested models by adding one variable at a time based on the ranking of variables mentioned before.  
+This procedure builds a ranking of variables, similar to the one of the stepAIC, meaning to create models by removing one variable at a time and sorting the variables by AIC. After that, we built nested models by adding one variable at a time based on the ranking of variables mentioned before.  
 
 ---COEFFICIENTS???---
 
@@ -516,18 +512,40 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
 
 
 ```{r}
-(result <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = FALSE, use_splines = FALSE))
+result_log <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = TRUE, use_splines = FALSE)
 ```
+
+
 ```{r}
-summary(result$Models$Driving_License)
+summary(result$Models$Vehicle_Damage)
 ```
+
 ```{r}
 summary(result$Models$Region_Reduced)
 ```
 
 ```{r}
-Anova(result$Models$Region_Reduced, result$Models$Driving_License)
+result_glm
 ```
+
+
+---choose best model (probably Region_Reduced) for occam razor---
+
+```{r}
+result_log
+```
+
+```{r}
+summary(result_log$Models$Region_Reduced)
+```
+
+```{r}
+summary(result_glm$Models$Region_Reduced)
+```
+
+Looking at the summary of the two models, we can see that the AIC is lower when the logarithm is not applied (idk if it's the best thing)
+
+
 
 
 ### Select the best models
