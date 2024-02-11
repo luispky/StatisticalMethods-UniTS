@@ -1008,12 +1008,12 @@ The model has an AUC of over 80% and the best threshold is 0.02.
 
 ```{r}
 #*FUNCTION TO PERFORM THE MODEL ASSESSMENT -------------------------------------
-random_forest_assessment <- function(model.rf, test_data){
+random_forest_assessment <- function(model.rf, unbalanced_test){
   # Probabilities prediction of the positive class
-  probabilities <- predict(model.rf, newdata = subset(test_data, select = -Response), type = "prob")[, "Yes"]
+  probabilities <- predict(model_rf, newdata = subset(unbalanced_test, select = -Response), type = "prob")[, "Yes"]
 
   # Compute ROC curve
-  roc_curve <- roc(test_data$Response, probabilities)
+  roc_curve <- roc(unbalanced_test$Response, probabilities)
   
   # Calculate AUC
   auc_score <- auc(roc_curve)
