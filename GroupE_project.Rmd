@@ -242,9 +242,9 @@ unbalanced_test <- unbalanced_test[, !names(unbalanced_test) %in% c("Policy_Sale
 ```
 
 
-```{r}
-full_model <- glm(Response ~ Gender + log(Age) + Driving_License + Previously_Insured + 
-    Vehicle_Age + Vehicle_Damage + log(Annual_Premium) + Vintage + 
+```{r, eval = FALSE}
+full_model <- glm(Response ~ Gender + Age + Driving_License + Previously_Insured + 
+    Vehicle_Age + Vehicle_Damage + Annual_Premium + Vintage + 
     Channels_Reduced + Region_Reduced, data = unbalanced_train, family = binomial)
 stepAIC(full_model, direction = 'both')
 ```
@@ -252,7 +252,83 @@ Performing the stepAIC function we can see that, as previously said, the variabl
 
 This procedure builds a ranking of variables, similar to the one of the stepAIC, meaning to create models by removing one variable at a time and sorting the variables by AIC. After that, we built nested models by adding one variable at a time based on the ranking of variables mentioned before.  
 
----COEFFICIENTS???---
+
+```{bash}
+
+Start:  AIC=144269.1
+Response ~ Gender + Age + Driving_License + Previously_Insured + 
+    Vehicle_Age + Vehicle_Damage + Annual_Premium + Vintage + 
+    Channels_Reduced + Region_Reduced
+
+                     Df Deviance    AIC
+- Vintage             1   144233 144267
+<none>                    144233 144269
+- Annual_Premium      1   144250 144284
+- Gender              1   144271 144305
+- Driving_License     1   144278 144312
+- Region_Reduced      4   144421 144449
+- Vehicle_Age         2   144580 144612
+- Age                 1   145993 146027
+- Channels_Reduced    4   146476 146504
+- Vehicle_Damage      1   148208 148242
+- Previously_Insured  1   149056 149090
+
+Step:  AIC=144267.2
+Response ~ Gender + Age + Driving_License + Previously_Insured + 
+    Vehicle_Age + Vehicle_Damage + Annual_Premium + Channels_Reduced + 
+    Region_Reduced
+
+                     Df Deviance    AIC
+<none>                    144233 144267
++ Vintage             1   144233 144269
+- Annual_Premium      1   144250 144282
+- Gender              1   144271 144303
+- Driving_License     1   144278 144310
+- Region_Reduced      4   144421 144447
+- Vehicle_Age         2   144580 144610
+- Age                 1   145994 146026
+- Channels_Reduced    4   146476 146502
+- Vehicle_Damage      1   148208 148240
+- Previously_Insured  1   149057 149089
+
+Call:  glm(formula = Response ~ Gender + Age + Driving_License + Previously_Insured + 
+    Vehicle_Age + Vehicle_Damage + Annual_Premium + Channels_Reduced + 
+    Region_Reduced, family = binomial, data = unbalanced_train)
+
+Coefficients:
+          (Intercept)             GenderMale                    Age  
+           -3.363e+00              8.284e-02             -2.644e-02  
+   Driving_LicenseYes  Previously_InsuredYes   Vehicle_Age> 2 Years  
+            1.106e+00             -3.855e+00              6.480e-01  
+  Vehicle_Age1-2 Year      Vehicle_DamageYes         Annual_Premium  
+            4.614e-01              1.975e+00              1.574e-06  
+  Channels_Reduced124    Channels_Reduced152    Channels_Reduced160  
+           -1.702e-01             -1.209e+00             -2.208e+00  
+    Channels_Reduced0       Region_Reduced28       Region_Reduced41  
+           -2.713e-01              2.573e-01              4.318e-01  
+     Region_Reduced46        Region_Reduced0  
+            1.484e-01              1.328e-01  
+
+Degrees of Freedom: 266775 Total (i.e. Null);  266759 Residual
+Null Deviance:	    198300 
+Residual Deviance: 144200 	AIC: 144300
+
+```
+```{r}
+best_model<-glm(Response ~ Gender + Age + Driving_License + Previously_Insured  + Vehicle_Age + Vehicle_Damage + Annual_Premium + 
+    Channels_Reduced + Region_Reduced, data = unbalanced_train, family = binomial)
+summary(best_model)
+```
+```{r}
+exp(best_model$coefficients) 
+```
+From the summary of the model, we can notice that all the coefficients are statistical significant:
+
+* For Gender there is an increment of about 9% in the interest of car insurance for male customers, with respect to females.
+
+* For Age there is a slight decrease in the interest of the car insurance as the age of the customer grows.
+
+* 
 
 ## Nested models
 The first approach consists of adding variables one by one, starting from an empty model and proceeding until all the variables considered in the model.
