@@ -8,6 +8,7 @@ output:
   word_document: default
 editor_options:
   markdown: null
+    wrap: sentence
   wrap: 72
 ---
 
@@ -25,13 +26,11 @@ load(paste(datasets_dir, "unbalanced_train.RData", sep = "/"))
 load(paste(datasets_dir, "unbalanced_test.RData", sep = "/"))
 ```
 
-
 # "Doubt the data until the data leave no room for doubt." - Henri Poincaré
 
 # Problem statement
-The dataset contains the data of the clients of an Insurance company that has provided Health Insurance. 
-Our goal is to analyze the relationship between the features and the probability of the customers buying a vehicle insurance.
-Now, in order to predict whether the customer would be interested in Vehicle insurance, we have information about demographics (gender, age, region code type), Vehicles (Vehicle Age, Damage), Policy ins(Premium, sourcing channel) etc.
+
+The dataset contains the data of the clients of an Insurance company that has provided Health Insurance. Our goal is to analyze the relationship between the features and the probability of the customers buying a vehicle insurance. Now, in order to predict whether the customer would be interested in Vehicle insurance, we have information about demographics (gender, age, region code type), Vehicles (Vehicle Age, Damage), Policy ins(Premium, sourcing channel) etc.
 
 Our client is an Insurance company that has provided Health Insurance to its customers. Now they need the help in building a model to predict whether the policyholders (customers) from the past year will also be interested in Vehicle Insurance provided by the company.
 
@@ -45,24 +44,24 @@ We had three datasets to analyze 'train.csv', 'test.csv' and 'sample.csv'. Among
 
 Our dataset is composed of the following variables:
 
-| Variable            | Definition                                                                                       | Type   |
-|---------------------|--------------------------------------------------------------------------------------------------|--------|
-| id                  | Unique ID for the customer                                                                       | Numeric|
-| Gender              | Gender of the customer                                                                           | Categorical|
-| Age                 | Age of the customer                                                                              | Numeric|
-| Driving_License     | 0 : Customer does not have DL, 1 : Customer already has DL                                       | Binary |
-| Region_Code         | Unique code for the region of the customer                                                       | Categorical|
-| Previously_Insured  | 1 : Customer already has Vehicle Insurance, 0 : Customer doesn't have Vehicle Insurance         | Binary |
-| Vehicle_Age         | Age of the Vehicle                                                                               | Categorical|
-| Vehicle_Damage      | 1 : Customer got his/her vehicle damaged in the past. 0 : Customer didn't get his/her vehicle damaged in the past. | Binary |
-| Annual_Premium      | The amount customer needs to pay as premium in the year                                           | Numeric|
-| Policy_Sales_Channel| Anonymized Code for the channel of outreaching to the customer ie. Different Agents, Over Mail, Over Phone, In Person, etc. | Categorical|
-| Vintage             | Number of Days, Customer has been associated with the company                                     | Numeric|
-| Response            | 1 : Customer is interested, 0 : Customer is not interested                                       | Binary |
+| Variable             | Definition                                                                                                                  | Type        |
+|----------------------|-----------------------------------------------------------------------------------------------------------------------------|-------------|
+| id                   | Unique ID for the customer                                                                                                  | Numeric     |
+| Gender               | Gender of the customer                                                                                                      | Categorical |
+| Age                  | Age of the customer                                                                                                         | Numeric     |
+| Driving_License      | 0 : Customer does not have DL, 1 : Customer already has DL                                                                  | Binary      |
+| Region_Code          | Unique code for the region of the customer                                                                                  | Categorical |
+| Previously_Insured   | 1 : Customer already has Vehicle Insurance, 0 : Customer doesn't have Vehicle Insurance                                     | Binary      |
+| Vehicle_Age          | Age of the Vehicle                                                                                                          | Categorical |
+| Vehicle_Damage       | 1 : Customer got his/her vehicle damaged in the past. 0 : Customer didn't get his/her vehicle damaged in the past.          | Binary      |
+| Annual_Premium       | The amount customer needs to pay as premium in the year                                                                     | Numeric     |
+| Policy_Sales_Channel | Anonymized Code for the channel of outreaching to the customer ie. Different Agents, Over Mail, Over Phone, In Person, etc. | Categorical |
+| Vintage              | Number of Days, Customer has been associated with the company                                                               | Numeric     |
+| Response             | 1 : Customer is interested, 0 : Customer is not interested                                                                  | Binary      |
 
 The first step is trying to get some insights about the dataset by plotting and analyzing the data. We present the barplots for the categorical variables and the density plots for the numerical ones.
 
-The 'id' variable is just a discrete ordered variable with uniform distribution. Therefore, we just removed it from our analysis. 
+The 'id' variable is just a discrete ordered variable with uniform distribution. Therefore, we just removed it from our analysis.
 
 ## Exploratory Data Analysis
 
@@ -104,12 +103,14 @@ p0 <- ggplot(pie_data, aes(x = "", y = Count, fill = Response)) +
 p0
 ```
 
-As we can see the dataset is unbalanced and the imbalance ratio is: 
+As we can see the dataset is unbalanced and the imbalance ratio is:
+
 ```{r}
 props <- table(train_reduced$Response)
 IR<-as.numeric(props[1]/props[2])
 sprintf("IR: %f", IR)
 ```
+
 This degree of imbalance is considered to be weak with respect to the reference level of 10 for slight imbalance, thus we decided to not perform any procedure to correct the imbalance.
 
 ### Numerical variables
@@ -122,12 +123,13 @@ p2 <- ggpairs(train_reduced,
                           continuous = wrap("densityDiag", alpha=0.7)))
 p2
 ```
-The distribution of the Age variable with respect to the Response variable shows that the majority of the customers who are interested in car insurance are middle-aged (between 30 and 60 years old), which coincides with the age people are more likely to own a car. 
-The customers not interested in acquiring a car insurance policy are mostly distributed among younger people and some middle-aged adults in their 50s. The ditribution is skewed to the right.
+
+The distribution of the Age variable with respect to the Response variable shows that the majority of the customers who are interested in car insurance are middle-aged (between 30 and 60 years old), which coincides with the age people are more likely to own a car. The customers not interested in acquiring a car insurance policy are mostly distributed among younger people and some middle-aged adults in their 50s. The ditribution is skewed to the right.
 
 The plot for Annual Premium suggests that the costs of the car insurance policy is independent of the interest if the customers to buy the product. It has a highly right-skewed distribution, with most of the data concentrated on the lower end of the premium scale and a long tail extending to higher premium values. The lower tail shows a high values as a consequence of entry level health insurance policy as expected.
 
 Since both Age and Annual Premium are skewed to the right, we considered to apply a logarithm transformation for both the variables.
+
 ```{r, fig.width=15, fig.height=15}
 train_reduced$logAge <- log(train_reduced$Age)
 train_reduced$logAnnual_Premium <- log(train_reduced$Annual_Premium)
@@ -168,13 +170,12 @@ p_cat <- p9 + p14
 p_cat##Should be clearer
 ```
 
-Regarding the variable Region_Code, we can notice that the vast majority of the customers are from region 28. The customers from region 28 are also the ones who are most interested in car insurance. 
-Almost half of the customers are distributed among regions 8, 28, 41, 46 accounting for ~47% of the total customers. Since this variable has a lot of labels with low frequency, we decided to consider only the major four ones mentioned above and an additional one with the remaining labels as a unique category.
+Regarding the variable Region_Code, we can notice that the vast majority of the customers are from region 28. The customers from region 28 are also the ones who are most interested in car insurance. Almost half of the customers are distributed among regions 8, 28, 41, 46 accounting for \~47% of the total customers. Since this variable has a lot of labels with low frequency, we decided to consider only the major four ones mentioned above and an additional one with the remaining labels as a unique category.
 
 Also in Policy_Sales_Channel, there are four categories more frequent than others: Channels 26, 124, 152 and 160 alone account for more than 80% of the customers. Channels 26 and 124 are the ones with the highest percentage of customers interested in the product. Only about 20% of the customers interested in the product are distributed in the rest of the channels of outreach. As we did for Region_Code, we grouped the remaining less frequent categories as one.
-  
-  
-  After the grouping:
+
+After the grouping:
+
 ```{r}
 p10 <- ggplot(train_reduced, aes(x = Region_Reduced, fill = Response)) + 
   geom_bar(position = "dodge", color = "black") +
@@ -197,7 +198,6 @@ p10+p15
 
 Gender...
 
-
 ```{r}
 p7 <- ggplot(train_reduced, aes(x = Gender, fill = Response)) + 
   geom_bar(position = "fill", color = "black") +
@@ -212,26 +212,19 @@ p7 <- ggplot(train_reduced, aes(x = Gender, fill = Response)) +
 p7
 ```
 
-
 The last categorical variable is ID, which we won't consider for models, since it is a simple identifier of the customers. Hence it doesn't give any more information about the Response.
 
 # MODELS
 
 After exploring the data, now we proceed with the fitting and assessment of different models for binary classification. For training and testing the models we performed a static train/test split with 70% of train set and 30% of test set.
 
-Il nostro scopo è capire quali variabili utilizzare e come utilizzarle.
--nested models statico con assessment
--stepAIC() con assessment
--rifare tutto con log?? oppure ne facciamo 2 in parallelo
+Il nostro scopo è capire quali variabili utilizzare e come utilizzarle. -nested models statico con assessment -stepAIC() con assessment -rifare tutto con log?? oppure ne facciamo 2 in parallelo
 
 In order to understand which variables are more significant in the explanation of the response variable, we analyzed nested models with different combinations of selected explanatory variables.
 
-  
 ## stepAIC
 
 The first approach we used consists of using the function stepAIC() from the MASS package to find the best combination of predictors with respect to AIC. The stepAIC() function must be applied to the full model, which serves as the starting point for the variable selection process. We chose the 'both' direction, that considers both adding and removing variables from the model.
-
-
 
 ```{r}
 # Drop columns Policy_Sales_Channel and Region_Code from unbalanced_train
@@ -241,17 +234,16 @@ unbalanced_train <- unbalanced_train[, !names(unbalanced_train) %in% c("Policy_S
 unbalanced_test <- unbalanced_test[, !names(unbalanced_test) %in% c("Policy_Sales_Channel", "Region_Code")]
 ```
 
-
 ```{r, eval = FALSE}
 full_model <- glm(Response ~ Gender + Age + Driving_License + Previously_Insured + 
     Vehicle_Age + Vehicle_Damage + Annual_Premium + Vintage + 
     Channels_Reduced + Region_Reduced, data = unbalanced_train, family = binomial)
 stepAIC(full_model, direction = 'both')
 ```
+
 Performing the stepAIC function we can see that, as previously said, the variable Vintage is not useful for the model, since its almost uniform distribution. The stepAIC function stops when the ranking of models built by removing and adding one variable at a time has an AIC greater than the default model. Hence, this procedure doesn't allow us to obtain a simple model based on the Occam's razor. Consequentially we also implemented a procedure to obtain a reduced model based on idea of the stepAIC.
 
-This procedure builds a ranking of variables, similar to the one of the stepAIC, meaning to create models by removing one variable at a time and sorting the variables by AIC. After that, we built nested models by adding one variable at a time based on the ranking of variables mentioned before.  
-
+This procedure builds a ranking of variables, similar to the one of the stepAIC, meaning to create models by removing one variable at a time and sorting the variables by AIC. After that, we built nested models by adding one variable at a time based on the ranking of variables mentioned before.
 
 ```{bash}
 
@@ -314,25 +306,28 @@ Null Deviance:	    198300
 Residual Deviance: 144200 	AIC: 144300
 
 ```
+
 ```{r}
 best_model<-glm(Response ~ Gender + Age + Driving_License + Previously_Insured  + Vehicle_Age + Vehicle_Damage + Annual_Premium + 
     Channels_Reduced + Region_Reduced, data = unbalanced_train, family = binomial)
 summary(best_model)
 ```
+
 ```{r}
 exp(best_model$coefficients) 
 ```
+
 From the summary of the model, we can notice that all the coefficients are statistically significant:
 
-* For Gender there is an increment of about 9% in the interest of car insurance for male customers, with respect to females.
+-   For Gender there is an increment of about 9% in the interest of car insurance for male customers, with respect to females.
 
-* For Age there is a slight decrease in the interest of the car insurance as the age of the customer grows.
+-   For Age there is a slight decrease in the interest of the car insurance as the age of the customer grows.
 
-* 
+-   
 
 ## Nested models
-The first approach consists of adding variables one by one, starting from an empty model and proceeding until all the variables considered in the model.
-##Comparison and model selection
+
+The first approach consists of adding variables one by one, starting from an empty model and proceeding until all the variables considered in the model. ##Comparison and model selection
 
 ```{r, echo=FALSE, collapse=TRUE}
 library(mgcViz)
@@ -587,15 +582,16 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
 
 ```
 
-
 ```{r}
 result_glm <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = FALSE, use_splines = FALSE)
 ```
+
 ```{r}
 result_glm
 ```
+
 Anova
-  
+
 ```{r}
 
 # Perform ANOVA
@@ -609,16 +605,17 @@ Observing the AIC and the anova test we noticed that there is not a significant 
 ```{r}
 summary(result_glm$Models$Region_Reduced)
 ```
+
 As we can see from the summary, all the variables have a p-value close to 0, hence they are all statistically significant
 
 ```{r}
 result_glm_log <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = TRUE, use_splines = FALSE)
 ```
 
-
 ```{r}
 result_glm_log
 ```
+
 This analysis shows that the best AIC in the model with the logarithm is worse than the model we chose for the glm without logarithm, hence we decided not to include the logarithm.
 
 Including the logarithm doesn't actually significantly improve the performance of the AIC.
@@ -636,7 +633,6 @@ s(Age) 8.323  8.754   2803  <2e-16 ***
 --- Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 R-sq.(adj) =  0.184   Deviance explained = 27.9% UBRE = -0.46369  Scale est. = 1         n = 266776
 ```
-
 
 ```{bash}
 [1] "Response ~ Previously_Insured"
@@ -861,10 +857,9 @@ plot(unique(y_probs), bin_means, type = "b", xlab = "Predicted Probability", yla
 abline(h = 0, lty = 2, col = "red") # Add horizontal line at y = 0
 ```
 
-
 ### The best overall
----plots of the gcVIZ library---
 
+---plots of the gcVIZ library---
 
 ```{r}
 # select the commands that actually convey relevant information
@@ -879,18 +874,16 @@ print(pl, pages = 1)
 ```
 
 #### Binned residuals, VIF, Anova
+
 ---for anova and vif we only need to compute that for the best model or the full model---
+
 ```{r}
 vif(result_glm$Models$Driving_License)
 ```
+
 Through the vif function we can see that there is no sign of multicolinearity, since the variance inflation factors are very small for every variable.
 
 Select one of the two blocks of code below
-
-```{r}
-test_data
-```
-
 
 ```{r}
 library(arm)
@@ -938,7 +931,7 @@ par(mfrow = c(1, 1))
 ```
 
 or
-  
+
 ```{r}
 library(arm)
 
@@ -974,7 +967,7 @@ lines(binned_residuals[,1], -binned_residuals[,6], type = "l", col = "blue")
 ```
 
 Anova
-  
+
 ```{r}
 
 # Perform ANOVA
@@ -983,14 +976,153 @@ anova_values <- anova(result_glm$Models$Vintage, test = "Chisq")
 anova_values
 ```
 
-
 #### Coefficients
 
 ## RF
+
 Due to our limited computational resources, we had to sample our dataset in order to fit a random forest model with 500 trees.
+
+```{r}
+sample <- unbalanced_train[sample(nrow(unbalanced_train), nrow(unbalanced_train)*0.6, replace = FALSE),]
+```
+
+```{r, eval = FALSE}
+library(randomForest)
+model_rf <- randomForest(Response ~ ., data = sample, importance = TRUE, ntree = 500)
+print(model_rf)
+```
+
+```{bash}
+Call:
+ randomForest(formula = Response ~ ., data = sample, importance = TRUE,      ntree = 500) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 12.2%
+Confusion matrix:
+        No Yes  class.error
+No  131627  72 0.0005467012
+Yes  18233  68 0.9962843560
+```
+
+We can notice that the class error for the Yes category is very high, therefore we decided to use a threshold in order to avoid misclassification.
+
+```{r}
+# Predict probabilities
+probabilities <- predict(model_rf, newdata = subset(unbalanced_test, select = -Response), type = "prob")[, "Yes"]
+ 
+# Compute ROC curve
+roc_curve <- roc(unbalanced_test$Response, probabilities)
+ 
+# Calculate AUC
+auc_score <- auc(roc_curve)
+ 
+# Find optimal threshold using Youden's J statistic
+youdens_j <- coords(roc_curve, "best", best.method = "youden")
+optimal_threshold <- youdens_j$threshold
+ 
+# Plot the ROC curve using plot.roc from the pROC package
+plot.roc(roc_curve, col = "blue", main = "ROC Curve", lwd = 2)
+ 
+# Add a point for the best threshold
+points(youdens_j$specificity, youdens_j$sensitivity, pch = 19, col = "red")
+ 
+# Adding a legend or text to mark the point
+text(youdens_j$specificity, youdens_j$sensitivity, labels = paste("Threshold:", round(optimal_threshold, 2)), pos = 4)
+ 
+# Add labels and legend
+abline(h = 0, v = 1, lty = 2, col = "gray")
+legend("topright", legend = paste("AUC =", round(auc(roc_curve), 2)), col = "blue", lwd = 2)
+ 
+```
+
+![](images/download.png)
+
+The model has an AUC of over 80% and the best threshold is 0.02.
+
+```{r}
+#*FUNCTION TO PERFORM THE MODEL ASSESSMENT -------------------------------------
+random_forest_assessment <- function(model.rf, test_data){
+  # Probabilities prediction of the positive class
+  probabilities <- predict(model.rf, newdata = subset(test_data, select = -Response), type = "prob")[, "Yes"]
+
+  # Compute ROC curve
+  roc_curve <- roc(test_data$Response, probabilities)
+  
+  # Calculate AUC
+  auc_score <- auc(roc_curve)
+
+  # Find optimal threshold using Youden's J statistic
+  youdens_j <- coords(roc_curve, "best", best.method = "youden")
+  optimal_threshold <- youdens_j$threshold
+
+  # Save ROC curve plot if specified
+
+  # Obtain predicted classes based on the optimal threshold
+  predicted_classes <- ifelse(probabilities > optimal_threshold, "Yes", "No")
+
+  # Create the confusion matrix
+  conf_matrix <- table(Actual = test_data$Response, Predicted = predicted_classes)
+
+  conf_matrix_prop <- prop.table(conf_matrix, margin = 1)
+
+  # Calculate accuracy
+  accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+
+  # Calculate true positive rate
+  tpr <- conf_matrix[2, 2] / sum(conf_matrix[2, ])
+
+  # Calculate false positive rate
+  fpr <- conf_matrix[1, 2] / sum(conf_matrix[1, ])
+
+  # Calculate true negative rate
+  tnr <- conf_matrix[1, 1] / sum(conf_matrix[1, ])
+
+  # Calculate false negative rate
+  fnr <- conf_matrix[2, 1] / sum(conf_matrix[2, ])
+
+  # Calculate precision
+  precision <- conf_matrix[2, 2] / sum(conf_matrix[, 2])
+
+  # Store the results in a data frame
+  results_df <- data.frame(AUC = auc_score,
+                          Accuracy = accuracy,
+                          TPR = tpr, 
+                          FPR = fpr,
+                          TNR = tnr,
+                          FNR = fnr,
+                          Precision = precision,
+                          Threshold = optimal_threshold)
+  # Return the results
+  return(results_df)
+
+}
+
+#*TRAIN THE RANDOM FOREST MODEL ------------------------------------------------
+
+# Set the seed for reproducibility
+set.seed(123)
+
+# Train the random forest model
+#rf_model <- randomForest(Response ~ ., data = unbalanced_train, ntree = 100)
+
+# Assess the model using the test set and don't save the plots
+rf_assessment <- random_forest_assessment(model.rf, test_data)
+
+rf_assessment
+
+```
+
+```{bash}
+AUC	Accuracy	TPR	FPR	TNR	FNR	Precision	Threshold
+<auc>	<dbl>	<dbl>	<dbl>	<dbl>	<dbl>	<dbl>	<dbl>
+0.8249842	0.6665879	0.922809	0.3693649	0.6306351	0.07719099	0.2595717	0.017
+
+```
 
 ### Performances
 
-
 # Final conclusions
+
 (skim)We observe that there are not missing values and that the Response variable has an imbalance rate of 7.15 (put code) so we don't need to act to fix that.
