@@ -322,7 +322,7 @@ summary(best_model)
 ```{r}
 exp(best_model$coefficients) 
 ```
-From the summary of the model, we can notice that all the coefficients are statistical significant:
+From the summary of the model, we can notice that all the coefficients are statistically significant:
 
 * For Gender there is an increment of about 9% in the interest of car insurance for male customers, with respect to females.
 
@@ -589,43 +589,278 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
 
 
 ```{r}
-result_log <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = TRUE, use_splines = FALSE)
+result_glm <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = FALSE, use_splines = FALSE)
 ```
-
-
-```{r}
-summary(result$Models$Vehicle_Damage)
-```
-
-```{r}
-summary(result$Models$Region_Reduced)
-```
-
 ```{r}
 result_glm
 ```
-
-
----choose best model (probably Region_Reduced) for occam razor---
-
+Anova
+  
 ```{r}
-result_log
+
+# Perform ANOVA
+
+anova_values <- anova(result_glm$Models$Vintage, test = "Chisq")
+anova_values
 ```
 
-```{r}
-summary(result_log$Models$Region_Reduced)
-```
+Observing the AIC and the anova test we noticed that there is not a significant decrease in the AIC or a significant improvement in deviance in the last three models, hence we decided to consider the nested model up to Region_Reduced.
 
 ```{r}
 summary(result_glm$Models$Region_Reduced)
 ```
+As we can see from the summary, all the variables have a p-value close to 0, hence they are all statistically significant
 
-Looking at the summary of the two models, we can see that the AIC is lower when the logarithm is not applied (idk if it's the best thing)
+```{r}
+result_glm_log <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = TRUE, use_splines = FALSE)
+```
 
 
+```{r}
+result_glm_log
+```
+This analysis shows that the best AIC in the model with the logarithm is worse than the model we chose for the glm without logarithm, hence we decided not to include the logarithm.
+
+Including the logarithm doesn't actually significantly improve the performance of the AIC.
+
+```{bash}
+Family: binomial Link function: logit Formula: Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced +     Region_Reduced Parametric coefficients:                       Estimate Std. Error z value Pr(>|z|)     (Intercept)           -3.05287    0.04875 -62.625  < 2e-16 *** Previously_InsuredYes -3.85032    0.09558 -40.282  < 2e-16 *** Vehicle_DamageYes      2.01116    0.04089  49.189  < 2e-16 *** Channels_Reduced124   -0.19166    0.01699 -11.280  < 2e-16 *** Channels_Reduced152   -1.00391    0.03076 -32.639  < 2e-16 *** Channels_Reduced160   -1.65849    0.06397 -25.924  < 2e-16 *** Channels_Reduced0     -0.26664    0.01760 -15.147  < 2e-16 *** 
+Region_Reduced28       0.26494    0.02651   9.994  < 2e-16 ***
+Region_Reduced41       0.40953    0.03952  10.362  < 2e-16 *** 
+Region_Reduced46       0.12364    0.03963   3.120  0.00181 ** 
+Region_Reduced0        0.11996    0.02640   4.545 5.51e-06 ***
+--- Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Approximate significance of smooth terms:          
+          edf Ref.df Chi.sq p-value     
+s(Age) 8.323  8.754   2803  <2e-16 *** 
+--- Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+R-sq.(adj) =  0.184   Deviance explained = 27.9% UBRE = -0.46369  Scale est. = 1         n = 266776
+```
 
 
-### Select the best models
+```{bash}
+[1] "Response ~ Previously_Insured"
+[1] "Response ~ Previously_Insured + Vehicle_Damage"
+[1] "Response ~ Previously_Insured + Vehicle_Damage + s(Age)"
+[1] "Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced"
+[1] "Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + Region_Reduced"
+[1] "Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + Region_Reduced + Vehicle_Age"
+[1] "Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + Region_Reduced + Vehicle_Age + s(Annual_Premium)"
+[1] "Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + Region_Reduced + Vehicle_Age + s(Annual_Premium) + Driving_License"
+[1] "Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + Region_Reduced + Vehicle_Age + s(Annual_Premium) + Driving_License + Gender"
+[1] "Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + Region_Reduced + Vehicle_Age + s(Annual_Premium) + Driving_License + Gender + Vintage"
+
+
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+Setting levels: control = No, case = Yes
+Setting direction: controls < cases
+ 
+
+
+$Ranking_Variables
+                      VariableRemoved      AIC
+Previously_Insured Previously_Insured 147581.0
+Vehicle_Damage         Vehicle_Damage 146894.0
+Age                               Age 145969.8
+Channels_Reduced     Channels_Reduced 144142.0
+Region_Reduced         Region_Reduced 143040.0
+Vehicle_Age               Vehicle_Age 142960.3
+Annual_Premium         Annual_Premium 142937.2
+Driving_License       Driving_License 142908.0
+Gender                         Gender 142903.5
+Vintage                       Vintage 142874.9
+$Results
+           Model_Name      AIC       AUC  Accuracy       TPR       FPR
+1  Previously_Insured 155905.7 0.7585627 0.5786343 0.9972279 0.4801025
+2      Vehicle_Damage 150595.1 0.7890232 0.6372613 0.9781790 0.4105761
+3                 Age 144890.1 0.8417453 0.6732614 0.9481129 0.3653056
+4    Channels_Reduced 143278.1 0.8501295 0.6979700 0.9226669 0.3335594
+5      Region_Reduced 143075.8 0.8510111 0.6959058 0.9281399 0.3366812
+6         Vehicle_Age 142992.3 0.8515785 0.7005327 0.9223115 0.3305872
+7      Annual_Premium 142932.1 0.8521367 0.6972178 0.9274291 0.3350854
+8     Driving_License 142901.6 0.8522854 0.6881215 0.9404364 0.3472832
+9              Gender 142874.9 0.8522166 0.6935268 0.9337551 0.3401819
+10            Vintage 142876.7 0.8522134 0.6942615 0.9326889 0.3391945
+         TNR         FNR Precision Threshold
+1  0.5198975 0.002772052 0.2256824 0.1131638
+2  0.5894239 0.021821025 0.2505462 0.1435224
+3  0.6346944 0.051887128 0.2669615 0.1045971
+4  0.6664406 0.077333144 0.2796123 0.1229755
+5  0.6633188 0.071860118 0.2789277 0.1207088
+6  0.6694128 0.077688535 0.2813408 0.1290902
+7  0.6649146 0.072570901 0.2797299 0.1225083
+8  0.6527168 0.059563580 0.2753533 0.1140271
+9  0.6598181 0.066244936 0.2780612 0.1189352
+10 0.6608055 0.067311110 0.2784155 0.1193174
+$Models
+$Models$Previously_Insured
+Family: binomial 
+Link function: logit 
+Formula:
+Response ~ Previously_Insured
+Total model degrees of freedom 2 
+UBRE score: -0.4155933     
+$Models$Vehicle_Damage
+Family: binomial 
+Link function: logit 
+Formula:
+Response ~ Previously_Insured + Vehicle_Damage
+Total model degrees of freedom 3 
+UBRE score: -0.4354999     
+$Models$Age
+Family: binomial 
+Link function: logit 
+Formula:
+Response ~ Previously_Insured + Vehicle_Damage + s(Age)
+Estimated degrees of freedom:
+8.41  total = 11.41 
+UBRE score: -0.4568848     
+$Models$Channels_Reduced
+Family: binomial 
+Link function: logit 
+Formula:
+Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced
+Estimated degrees of freedom:
+8.24  total = 15.24 
+UBRE score: -0.4629275     
+$Models$Region_Reduced
+Family: binomial 
+Link function: logit 
+Formula:
+Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + 
+    Region_Reduced
+Estimated degrees of freedom:
+8.32  total = 19.32 
+UBRE score: -0.4636857     
+$Models$Vehicle_Age
+Family: binomial 
+Link function: logit 
+Formula:
+Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + 
+    Region_Reduced + Vehicle_Age
+Estimated degrees of freedom:
+8.21  total = 21.21 
+UBRE score: -0.4639986     
+$Models$Annual_Premium
+Family: binomial 
+Link function: logit 
+Formula:
+Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + 
+    Region_Reduced + Vehicle_Age + s(Annual_Premium)
+Estimated degrees of freedom:
+8.21 7.68  total = 28.89 
+UBRE score: -0.4642244     
+$Models$Driving_License
+Family: binomial 
+Link function: logit 
+Formula:
+Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + 
+    Region_Reduced + Vehicle_Age + s(Annual_Premium) + Driving_License
+Estimated degrees of freedom:
+8.19 7.70  total = 29.88 
+UBRE score: -0.4643386     
+$Models$Gender
+Family: binomial 
+Link function: logit 
+Formula:
+Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + 
+    Region_Reduced + Vehicle_Age + s(Annual_Premium) + Driving_License + 
+    Gender
+Estimated degrees of freedom:
+8.17 7.72  total = 30.89 
+UBRE score: -0.4644388     
+$Models$Vintage
+Family: binomial 
+Link function: logit 
+Formula:
+Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced + 
+    Region_Reduced + Vehicle_Age + s(Annual_Premium) + Driving_License + 
+    Gender + Vintage
+Estimated degrees of freedom:
+8.17 7.72  total = 31.89 
+UBRE score: -0.4644318  
+```
+
+Trying to fit the model with gam and adding a spline for Age variable, we noticed that not only the AIC improves, but the expected degrees of freedom for the Age are significantly high, hence, so far, the best model seems to be the one using gam with splines on Age.
+
+```{r}
+library(arm)
+predicted_values <- predict(result_glm$Models$Region_Reduced, newdata = subset(unbalanced_test, select = -Response), type = "response")
+
+y_pred <- ifelse(predicted_values >= 0.14, "Yes", "No")
+residuals <- ifelse(predicted_values >= threshold, unbalanced_test$Response - predicted_values, NA)
+# Calculate residuals
+
+# Get predicted values from the model
+
+
+# Calculate residuals
+#residuals <- residuals(result_glm$Models$Driving_License, type = "deviance")
+
+# Use binned.resids function
+binned_residuals <- binned.resids(predicted_values, residuals, nclass = 50)$binned
+
+# Print binned residuals
+print(binned_residuals)
+
+str(binned_residuals)
+
+# Plot binned residuals
+plot(
+  range(binned_residuals[, 1]),
+  range(binned_residuals[, 2], binned_residuals[, 6], -binned_residuals[, 6]),
+  type = "n",  
+  xlab = "Estimated Pr(Interest in Car Insurance)",
+  ylab = "Average Residual",
+  main = "Binned Residual Plot",
+  ylim = c(-2, 2)
+)
+abline(h = 0, col = "gray")
+points(binned_residuals[,1], binned_residuals[,2], type = "p", col = "blue")
+lines(binned_residuals[,1], binned_residuals[,6], type = "l", col = "blue")
+lines(binned_residuals[,1], -binned_residuals[,6], type = "l", col = "blue")
+
+```
+
+```{r}
+# Choose a threshold probability
+threshold <- 0.14
+
+# Predict probabilities
+y_probs <- predict(result_glm$Models$Region_Reduced, newdata = subset(unbalanced_test, select = -Response), type = "response")
+
+# Apply threshold to predictions
+y_pred <- ifelse(y_probs >= threshold, "Yes", "No")
+
+# Calculate residuals
+residuals <- ifelse(unbalanced_test$Response == 1, unbalanced_test$Response - y_probs, unbalanced_test$Response - (1 - y_probs))
+
+# Bin residuals based on predicted probabilities
+bins <- cut(y_probs, breaks = seq(0, 1, by = 0.1), include.lowest = TRUE)
+bin_means <- tapply(residuals, bins, mean)
+
+# Plot binned residuals
+plot(unique(y_probs), bin_means, type = "b", xlab = "Predicted Probability", ylab = "Mean Residual", main = "Binned Residuals")
+abline(h = 0, lty = 2, col = "red") # Add horizontal line at y = 0
+```
+
 
 ### The best overall
 ---plots of the gcVIZ library---
@@ -645,8 +880,17 @@ print(pl, pages = 1)
 
 #### Binned residuals, VIF, Anova
 ---for anova and vif we only need to compute that for the best model or the full model---
+```{r}
+vif(result_glm$Models$Driving_License)
+```
+Through the vif function we can see that there is no sign of multicolinearity, since the variance inflation factors are very small for every variable.
 
 Select one of the two blocks of code below
+
+```{r}
+test_data
+```
+
 
 ```{r}
 library(arm)
@@ -699,10 +943,10 @@ or
 library(arm)
 
 # Get predicted values from the model
-predicted_values <- predict(model, test_data, type = "response")
+predicted_values <- predict(model_glm, test_data, type = "response")
 
 # Calculate residuals
-residuals <- residuals(model, type = "deviance")
+residuals <- residuals(model_glm, type = "deviance")
 
 # Use binned.resids function
 binned_residuals <- binned.resids(predicted_values, residuals, nclass = 50)$binned
@@ -729,24 +973,16 @@ lines(binned_residuals[,1], -binned_residuals[,6], type = "l", col = "blue")
 
 ```
 
-VIF
-  
-```{r}
-
-# Compute VIF
-vif_values <- vif(model)
-
-```
-
 Anova
   
 ```{r}
 
 # Perform ANOVA
 
-anova_values <- anova(model, test = "Chisq")
-
+anova_values <- anova(result_glm$Models$Vintage, test = "Chisq")
+anova_values
 ```
+
 
 #### Coefficients
 
