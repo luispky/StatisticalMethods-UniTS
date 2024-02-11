@@ -199,7 +199,7 @@ Gender...
 
 
 ```{r}
-p7 <- ggplot(train_df, aes(x = Gender, fill = Response)) + 
+p7 <- ggplot(train_reduced, aes(x = Gender, fill = Response)) + 
   geom_bar(position = "fill", color = "black") +
   labs(y = "Percentage", fill = "Response") +
   scale_y_continuous(labels = scales::percent_format()) +
@@ -268,6 +268,7 @@ library(skimr)
 library(pROC)
 library(caret)
 library(purrr)
+install.packages("ROSE")
 #*LOAD THE DATA-----------------------------------------------------------------
 # Define the path to the datasets
 current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
