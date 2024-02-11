@@ -45,7 +45,7 @@ We had three datasets to analyze 'train.csv', 'test.csv' and 'sample.csv'. Among
 Our dataset is composed of the following variables:
 
 | Variable             | Definition                                                                                                                  | Type        |
-|----------------------|-----------------------------------------------------------------------------------------------------------------------------|-------------|
+|------------------|-------------------------------------|------------------|
 | id                   | Unique ID for the customer                                                                                                  | Numeric     |
 | Gender               | Gender of the customer                                                                                                      | Categorical |
 | Age                  | Age of the customer                                                                                                         | Numeric     |
@@ -317,13 +317,27 @@ summary(best_model)
 exp(best_model$coefficients) 
 ```
 
-From the summary of the model, we can notice that all the coefficients are statistically significant:
+These results suggest that:
+ 
+* Male customers are 9% more interested in car insurance than female customers.
+ 
+* There is a slight decrease in the odds of interest in the product with each year of increasing customer age. 
 
--   For Gender there is an increment of about 9% in the interest of car insurance for male customers, with respect to females.
-
--   For Age there is a slight decrease in the interest of the car insurance as the age of the customer grows.
-
--   
+* Customers with a driver's license are 3 times more interested in the product than those without a driver's license.
+ 
+* There is a dramatic decrease in the interest of the customers in the product for those who previously had their cars insured. The company should focus on improving its services because current policyholders lose their interest by 98% with respect to those without car insurance.
+ 
+* The results show that customers with older cars show more interest than customers with new cars. Around 2 times for cars more than 2 years old compared to new cars.
+ 
+* The interest in the Car Insurance Policy of the customers with health insurance who had their car damaged in the past is more than 7 times that of those who haven´t. This is expected and a variable the company should focus on to estimate the risk associated with these customers.
+ 
+* The amount the customer needs to pay as a premium in the year doesn't seem to be associated with any increase or decrease in the odds of the event.
+ 
+* There is more interest in the product, from ~14% to ~54% more interest, for customers from Regions 28, 41, 46, and 0 (combination of low frequent regions) with respect to Region 8.  
+ 
+* The outreach Channel 26 (base category in the model) gets from 16% to 90% more interested customers in comparison with Channel 26. Channel 124 attracts a lot of clients as well and the company could attempt to increase its influence in this channel.
+ 
+* The variable Vintage (number of days the customers have been associated with the company) was completely removed from the model because of low significance with respect to the AIC.
 
 ## Nested models
 
@@ -610,15 +624,11 @@ As we can see from the summary, all the variables have a p-value close to 0, hen
 
 ```{r}
 result_glm_log <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = TRUE, use_splines = FALSE)
-```
-
-```{r}
 result_glm_log
 ```
 
-This analysis shows that the best AIC in the model with the logarithm is worse than the model we chose for the glm without logarithm, hence we decided not to include the logarithm.
 
-Including the logarithm doesn't actually significantly improve the performance of the AIC.
+This analysis shows that the best AIC in the model with the logarithm is worse than the model we chose for the glm without logarithm, hence we decided not to include the logarithm.
 
 ```{bash}
 Family: binomial Link function: logit Formula: Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced +     Region_Reduced Parametric coefficients:                       Estimate Std. Error z value Pr(>|z|)     (Intercept)           -3.05287    0.04875 -62.625  < 2e-16 *** Previously_InsuredYes -3.85032    0.09558 -40.282  < 2e-16 *** Vehicle_DamageYes      2.01116    0.04089  49.189  < 2e-16 *** Channels_Reduced124   -0.19166    0.01699 -11.280  < 2e-16 *** Channels_Reduced152   -1.00391    0.03076 -32.639  < 2e-16 *** Channels_Reduced160   -1.65849    0.06397 -25.924  < 2e-16 *** Channels_Reduced0     -0.26664    0.01760 -15.147  < 2e-16 *** 
@@ -798,64 +808,19 @@ Trying to fit the model with gam and adding a spline for Age variable, we notice
 
 ```{r}
 library(arm)
-predicted_values <- predict(result_glm$Models$Region_Reduced, newdata = subset(unbalanced_test, select = -Response), type = "response")
-
-y_pred <- ifelse(predicted_values >= 0.14, "Yes", "No")
-residuals <- ifelse(predicted_values >= threshold, unbalanced_test$Response - predicted_values, NA)
-# Calculate residuals
-
 # Get predicted values from the model
-
-
+predicted_values <- predict(result_glm$Models$Region_Reduced, unbalanced_test, type = "response", threshold = result_glm$Results$Threshold[5])
+ #?predict
 # Calculate residuals
-#residuals <- residuals(result_glm$Models$Driving_License, type = "deviance")
-
-# Use binned.resids function
-binned_residuals <- binned.resids(predicted_values, residuals, nclass = 50)$binned
-
-# Print binned residuals
-print(binned_residuals)
-
-str(binned_residuals)
-
-# Plot binned residuals
-plot(
-  range(binned_residuals[, 1]),
-  range(binned_residuals[, 2], binned_residuals[, 6], -binned_residuals[, 6]),
-  type = "n",  
-  xlab = "Estimated Pr(Interest in Car Insurance)",
-  ylab = "Average Residual",
-  main = "Binned Residual Plot",
-  ylim = c(-2, 2)
-)
-abline(h = 0, col = "gray")
-points(binned_residuals[,1], binned_residuals[,2], type = "p", col = "blue")
-lines(binned_residuals[,1], binned_residuals[,6], type = "l", col = "blue")
-lines(binned_residuals[,1], -binned_residuals[,6], type = "l", col = "blue")
-
+residuals <- residuals(result_glm$Models$Region_Reduced, type = "deviance", threshold = result_glm$Results$Threshold[5])
+ 
+# Take the indexes for the predictions with probabiliies greater or equal than the optimal threshold
+#best_model_indexes <- predicted_values >= 0.14
+ 
+# Plot the binned residuals
+arm::binnedplot(predicted_values[best_model_indexes], residuals[best_model_indexes])
 ```
 
-```{r}
-# Choose a threshold probability
-threshold <- 0.14
-
-# Predict probabilities
-y_probs <- predict(result_glm$Models$Region_Reduced, newdata = subset(unbalanced_test, select = -Response), type = "response")
-
-# Apply threshold to predictions
-y_pred <- ifelse(y_probs >= threshold, "Yes", "No")
-
-# Calculate residuals
-residuals <- ifelse(unbalanced_test$Response == 1, unbalanced_test$Response - y_probs, unbalanced_test$Response - (1 - y_probs))
-
-# Bin residuals based on predicted probabilities
-bins <- cut(y_probs, breaks = seq(0, 1, by = 0.1), include.lowest = TRUE)
-bin_means <- tapply(residuals, bins, mean)
-
-# Plot binned residuals
-plot(unique(y_probs), bin_means, type = "b", xlab = "Predicted Probability", ylab = "Mean Residual", main = "Binned Residuals")
-abline(h = 0, lty = 2, col = "red") # Add horizontal line at y = 0
-```
 
 ### The best overall
 
@@ -1121,7 +1086,15 @@ AUC	Accuracy	TPR	FPR	TNR	FNR	Precision	Threshold
 
 ```
 
+
 ### Performances
+
+| Models/Indexes | AUC  | Accuracy | TPR  | FPR  | TNR  | FNR  | Precision |
+|----------------|------|----------|------|------|------|------|-----------|
+| GLM            | 0.84 | 0.71     | 0.91 | 0.32 | 0.68 | 0.09 | 0.28      |
+| GAM            | 0.85 | 0.70     | 0.93 | 0.34 | 0.66 | 0.07 | 0.28      |
+| Random Forest  | 0.82 | 0.67     | 0.92 | 0.37 | 0.63 | 0.08 | 0.26      |
+
 
 # Final conclusions
 
