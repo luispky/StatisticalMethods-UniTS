@@ -891,7 +891,9 @@ pl <- plot(gam_sampledViz, allTerms = T) + l_points() + l_fitLine(linetype = 3) 
       # l_dens(type = "cond")
 print(pl, pages = 1)
 ```
-![](images/getViz_gam.png)
+![](images/getViz_gam_1.png)
+![](images/getViz_gam_2.png)
+![](images/getViz_gam_3.png)
 ---how do we interpret this getViz of the gam model????---
 
 
