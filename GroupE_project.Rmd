@@ -307,6 +307,8 @@ Residual Deviance: 144200 	AIC: 144300
 
 ```
 
+###GLM summary on the AIC best models <- does it have to stay here???
+
 ```{r}
 best_model<-glm(Response ~ Gender + Age + Driving_License + Previously_Insured  + Vehicle_Age + Vehicle_Damage + Annual_Premium + 
     Channels_Reduced + Region_Reduced, data = unbalanced_train, family = binomial)
@@ -595,7 +597,7 @@ models_assessment <- function(model, test_data, save_plots = FALSE, plot_auc_nam
 #*RUN THE MODEL
 
 ```
-
+##GLM
 ```{r}
 result_glm <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = FALSE, use_splines = FALSE)
 ```
@@ -616,12 +618,37 @@ anova_values
 
 Observing the AIC and the anova test we noticed that there is not a significant decrease in the AIC or a significant improvement in deviance in the last three models, hence we decided to consider the nested model up to Region_Reduced.
 
+###GLM summary on Region Reduced <- does it have to stay here???
 ```{r}
 summary(result_glm$Models$Region_Reduced)
 ```
 
-As we can see from the summary, all the variables have a p-value close to 0, hence they are all statistically significant
+As we can see from the summary, all the variables have a p-value close to 0, hence they are all statistically significant. We can compute the exponentials of these coefficients to obtain the odds ratio: 
 
+```{bash}
+coefficienti....
+(Intercept): 0.115820434067376
+Previously_InsuredYes: 0.0212237185935525
+Vehicle_DamageYes: 7.22774118775977
+Channels_Reduced124: 0.846398044753794
+Channels_Reduced152: 0.296645211621213
+Channels_Reduced160: 0.108753298629103
+Channels_Reduced0: 0.753240396948334
+Age: 0.973935753410994
+Vehicle_Age> 2 Years: 1.9270870048764
+Vehicle_Age1-2 Year: 1.58835054169979
+Region_Reduced28: 1.29507104853947
+Region_Reduced41: 1.52836786693869
+Region_Reduced46: 1.14450193557707
+Region_Reduced0: 1.12261915156786
+```
+
+we can comment these results as follows: <- da modificare
+-The odds of a customer being interested in Vehicle insurance are 7 times higher for those who have had a vehicle damage compared to those who didn't.
+-Compared to the baseline (intercept <- whoooo????), the odds of a customer being interested in Vehicle insurance are higher for those who live in Region 28, 41, 46 or 0. Furthermore, the odds of a customer being interested in Vehicle insurance get higher as the Age of the vehicle increases.
+-Compared to the baseline (intercept <- whoooo????), the odds of a customer being interested in Vehicle insurance are lower for those being previously insured and for those having a channel of outreaching with code 124, 160, 152 or 0. Furthermore, the odds of a customer being interested in Vehicle insurance get lower as the Age of the customer increases.
+
+##GLM with log
 ```{r}
 result_glm_log <- ranking_nested_models(unbalanced_train, unbalanced_test, use_model = "glm", use_log = TRUE, use_splines = FALSE)
 result_glm_log
@@ -629,20 +656,7 @@ result_glm_log
 
 This analysis shows that the best AIC in the model with the logarithm is worse than the model we chose for the glm without logarithm, hence we decided not to include the logarithm.
 
-```{bash}
-Family: binomial Link function: logit Formula: Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced +     Region_Reduced Parametric coefficients:                       Estimate Std. Error z value Pr(>|z|)     (Intercept)           -3.05287    0.04875 -62.625  < 2e-16 *** Previously_InsuredYes -3.85032    0.09558 -40.282  < 2e-16 *** Vehicle_DamageYes      2.01116    0.04089  49.189  < 2e-16 *** Channels_Reduced124   -0.19166    0.01699 -11.280  < 2e-16 *** Channels_Reduced152   -1.00391    0.03076 -32.639  < 2e-16 *** Channels_Reduced160   -1.65849    0.06397 -25.924  < 2e-16 *** Channels_Reduced0     -0.26664    0.01760 -15.147  < 2e-16 *** 
-Region_Reduced28       0.26494    0.02651   9.994  < 2e-16 ***
-Region_Reduced41       0.40953    0.03952  10.362  < 2e-16 *** 
-Region_Reduced46       0.12364    0.03963   3.120  0.00181 ** 
-Region_Reduced0        0.11996    0.02640   4.545 5.51e-06 ***
---- Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
-Approximate significance of smooth terms:          
-          edf Ref.df Chi.sq p-value     
-s(Age) 8.323  8.754   2803  <2e-16 *** 
---- Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
-R-sq.(adj) =  0.184   Deviance explained = 27.9% UBRE = -0.46369  Scale est. = 1         n = 266776
-```
-
+##Gam models (1)
 ```{bash}
 [1] "Response ~ Previously_Insured"
 [1] "Response ~ Previously_Insured + Vehicle_Damage"
@@ -803,6 +817,48 @@ Estimated degrees of freedom:
 UBRE score: -0.4644318  
 ```
 
+
+###GAM summary on Region Reduced (2) <- does it have to stay here???
+
+```{bash}
+Family: binomial Link function: logit Formula: Response ~ Previously_Insured + Vehicle_Damage + s(Age) + Channels_Reduced +     Region_Reduced Parametric coefficients:                       Estimate Std. Error z value Pr(>|z|)     (Intercept)           -3.05287    0.04875 -62.625  < 2e-16 *** Previously_InsuredYes -3.85032    0.09558 -40.282  < 2e-16 *** Vehicle_DamageYes      2.01116    0.04089  49.189  < 2e-16 *** Channels_Reduced124   -0.19166    0.01699 -11.280  < 2e-16 *** Channels_Reduced152   -1.00391    0.03076 -32.639  < 2e-16 *** Channels_Reduced160   -1.65849    0.06397 -25.924  < 2e-16 *** Channels_Reduced0     -0.26664    0.01760 -15.147  < 2e-16 *** 
+Region_Reduced28       0.26494    0.02651   9.994  < 2e-16 ***
+Region_Reduced41       0.40953    0.03952  10.362  < 2e-16 *** 
+Region_Reduced46       0.12364    0.03963   3.120  0.00181 ** 
+Region_Reduced0        0.11996    0.02640   4.545 5.51e-06 ***
+--- Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Approximate significance of smooth terms:          
+          edf Ref.df Chi.sq p-value     
+s(Age) 8.323  8.754   2803  <2e-16 *** 
+--- Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+R-sq.(adj) =  0.184   Deviance explained = 27.9% UBRE = -0.46369  Scale est. = 1         n = 266776
+```
+
+from the summary we can see that all the variables are statistically significant, hence we may interpret their meaning by analyzing the exponential values:
+
+```{r, eval=FALSE}
+exp(results_gam$Models$Region_Reduced$coefficients)
+```
+```{bash}
+(Intercept): 0.0472232914688164
+Previously_InsuredYes: 0.0212728509555799
+Vehicle_DamageYes: 7.47196369221081
+Channels_Reduced124: 0.825585274766525
+Channels_Reduced152: 0.36644516247205
+Channels_Reduced160: 0.190425915168401
+Channels_Reduced0: 0.765945437210526
+Region_Reduced28: 1.3033508375302
+Region_Reduced41: 1.50611374045092
+Region_Reduced46: 1.13160731002056
+Region_Reduced0: 1.12745438452808
+```
+
+we can comment these results as follows:
+-The odds of a customer being interested in Vehicle insurance are 7 times higher for those who have had a vehicle damage compared to those who didn't.
+-Compared to the baseline (intercept <- whoooo????), the odds of a customer being interested in Vehicle insurance are higher for those who live in Region 28, 41, 46 or 0.
+-Compared to the baseline (intercept <- whoooo????), the odds of a customer being interested in Vehicle insurance are lower for those being previously insured and for those having a channel of outreaching with code 124, 160, 152 or 0.
+-Since the splines have 8.34 degrees of freedom, they are relevant for the estimation of the response variable.
+
 Trying to fit the model with gam and adding a spline for Age variable, we noticed that not only the AIC improves, but the expected degrees of freedom for the Age are significantly high, hence, so far, the best model seems to be the one using gam with splines on Age.
 
 ```{r}
@@ -820,7 +876,7 @@ residuals <- residuals(result_glm$Models$Region_Reduced, type = "deviance", thre
 arm::binnedplot(predicted_values[best_model_indexes], residuals[best_model_indexes])
 ```
 
-### The best overall
+### The best overall <- does it have to stay here???
 
 ---plots of the gcVIZ library---
 
