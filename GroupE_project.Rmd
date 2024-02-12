@@ -835,6 +835,9 @@ pl <- plot(gam_sampledViz, allTerms = T) + l_points() + l_fitLine(linetype = 3) 
       # l_dens(type = "cond")
 print(pl, pages = 1)
 ```
+![](images/getViz_gam.png)
+---how do we interpret this getViz of the gam model????---
+
 
 #### Binned residuals, VIF, Anova
 
@@ -1108,3 +1111,24 @@ It is important to consider the context of this analysis. Since we are dealing w
 (skim)We observe that there are not missing values and that the Response variable has an imbalance rate of 7.15 (put code) so we don't need to act to fix that.
 
 ----CHECK THE DATASETS, WE HAVE TO USE THE UNBALANCED ONE----
+
+These results suggest that: <- how do we want to interpret the results of the models? do we want to comment the coefficients of each model? or do we want to comment only the one that we think is the best suitable for the problem? (like the GAM model, mentioned above)
+ 
+* Male customers are 9% more interested in car insurance than female customers.
+ 
+* There is a slight decrease in the odds of interest in the product with each year of increasing customer age. 
+* Customers with a driver's license are 3 times more interested in the product than those without a driver's license. <- how do we interpret the intercept???
+ 
+* There is a dramatic decrease in the interest of the customers in the product for those who previously had their cars insured. The company should focus on improving its services because current policyholders lose their interest by 98% with respect to those without car insurance.
+ 
+* The results show that customers with older cars show more interest than customers with new cars. Around 2 times for cars more than 2 years old compared to new cars.
+ 
+* The interest in the Car Insurance Policy of the customers with health insurance who had their car damaged in the past is more than 7 times that of those who haven´t. This is expected and a variable the company should focus on to estimate the risk associated with these customers. <- what do you mean with "to estimate the risk associated with these customers"?
+ 
+* The amount the customer needs to pay as a premium in the year doesn't seem to be associated with any increase or decrease in the odds of the event. <- isn't it strange that the model finds this significantly relevant even though this variable doesn't affect the Response?
+ 
+* There is more interest in the product, from ~14% to ~54% more interest, for customers from Regions 28, 41, 46, and 0 (combination of low frequent regions) with respect to Region 8. <- and the rest of the regions seems to be non relevant for the estimation..? to be checked with the meaning of the intercept
+ 
+* The outreach Channel 26 (base category in the model) gets from 16% to 90% more interested customers in comparison with Channel 26 (what????). Channel 124 attracts a lot of clients as well and the company could attempt to increase its influence in this channel.
+ 
+* The variable Vintage (number of days the customers have been associated with the company) was completely removed from the model because of low significance with respect to the AIC.
