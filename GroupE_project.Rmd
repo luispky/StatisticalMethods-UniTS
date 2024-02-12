@@ -1,5 +1,5 @@
 ---
-title: "CHECK THE DATASETS, WE HAVE TO USE THE UNBALANCED ONE"
+title: "GroupE Project"
 author: "A. Gottardi, E. Corrolezzis, A. Minutolo, L.F. Palacios Flores"
 output:
   pdf_document: default
@@ -1098,7 +1098,7 @@ AUC	Accuracy	TPR	FPR	TNR	FNR	Precision	Threshold
 
 **Random Forest:** doesn't perform better than the other kind of models under any index.
 
-It is inportant to consider the context of this analysis. Since we are dealing with insurance data and our target variable is whether the customer would be interested in Vehicle insurance, we may opt for the model that prioritizes the highest AUC score, as it reflects the overall ability to distinguish between customers interested and not interested in vehicle insurance, capturing both true positives and true negatives effectively. Hence, for this kind of analysis, the GAM model could be the best choice.
+It is important to consider the context of this analysis. Since we are dealing with insurance data and our target variable is whether the customer would be interested in Vehicle insurance, we may opt for the model that prioritizes the highest AUC score, as it reflects the overall ability to distinguish between customers interested and not interested in vehicle insurance, capturing both true positives and true negatives effectively. Hence, for this kind of analysis, the GAM model could be the best choice.
 
 ----to be checked----
 
@@ -1106,3 +1106,5 @@ It is inportant to consider the context of this analysis. Since we are dealing w
 # Final conclusions
 
 (skim)We observe that there are not missing values and that the Response variable has an imbalance rate of 7.15 (put code) so we don't need to act to fix that.
+
+----CHECK THE DATASETS, WE HAVE TO USE THE UNBALANCED ONE----
