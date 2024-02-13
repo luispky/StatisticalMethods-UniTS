@@ -773,10 +773,10 @@ testSet <- sample[-trainIndex,]
 
 ```{r}
 # Drop columns Policy_Sales_Channel and Region_Code from unbalanced_train
-trainSet <- trainSet[, !names(trainSet) %in% c("Policy_Sales_Channel", "Region_Code")]
+trainSet <- trainSet[, !names(trainSet) %in% c("Policy_Sales_Channel", "Region_Code", "logAge", "logAnnual_Premium")]
 
 # Drop columns Policy_Sales_Channel and Region_Code from unbalanced_test
-testSet <- testSet[, !names(testSet) %in% c("Policy_Sales_Channel", "Region_Code")]
+testSet <- testSet[, !names(testSet) %in% c("Policy_Sales_Channel", "Region_Code", "logAge", "logAnnual_Premium")]
 ```
 
 ```{r}
@@ -882,9 +882,6 @@ random_forest_assessment <- function(model_rf, testSet){
 ```
 
 ```{r}
-# Train the random forest model
-rf_model <- randomForest(Response ~ ., data = unbalanced_train, ntree = 100)
-
 # Assess the model using the test set and don't save the plots
 rf_assessment <- random_forest_assessment(model_rf, testSet)
 
