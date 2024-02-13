@@ -159,12 +159,9 @@ customers not interested in acquiring a car insurance policy are mostly
 distributed among younger people and some middle-aged adults in their
 50s. The ditribution is skewed to the right.
 
-The plot for Annual Premium suggests that the costs of the car insurance
-policy is independent of the interest if the customers to buy the
-product. It has a highly right-skewed distribution, with most of the
+The plot for Annual Premium shows that the response distributions are quite similar across the Annual Premiums: they are highly right-skewed distribution, with most of the
 data concentrated on the lower end of the premium scale and a long tail
-extending to higher premium values. The lower tail shows a high values
-as a consequence of entry level health insurance policy as expected.
+extending to higher premium values: approximately above 1e+05.
 
 Since both Age and Annual Premium are skewed to the right, we considered
 to apply a logarithm transformation for both the variables.
@@ -314,9 +311,8 @@ Performing the stepAIC() function we confirmed that the variable Vintage
 is not useful for the model, because of its uniform distribution. The
 stepAIC() function stops when the ranking of models built by removing
 and adding one variable at a time has an AIC greater than the default
-model. Hence, this procedure doesn't allow us to obtain a simple model
-based on the Occam's razor. Consequentially we also implemented a
-procedure to obtain a reduced model based on idea of the stepAIC().
+model. Hence, this procedure doesn't allow us to obtain a simpler model. Consequentially we also implemented a
+procedure to obtain a reduced model based on idea of the stepAIC.
 
 ```{r}
 best_model<-glm(Response ~ Gender + Age + Driving_License + Previously_Insured  + Vehicle_Age + Vehicle_Damage + Annual_Premium + 
