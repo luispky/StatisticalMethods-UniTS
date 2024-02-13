@@ -382,11 +382,6 @@ mentioned before. The aim is to find the optimal model based on both AIC
 and the Occam's razor.
 
 ```{r}
-#*LOAD THE DATA-----------------------------------------------------------------
-# Define the path to the datasets
-current_path <- dirname(rstudioapi::getActiveDocumentContext()$path)
-datasets_dir <- paste(current_path,"datasets", sep = "/")
-
 #*--------------------------------------------------------------------
 #*FUNCTIONS 
 #*--------------------------------------------------------------------
