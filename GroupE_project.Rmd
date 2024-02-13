@@ -748,7 +748,7 @@ of heteroscedasticity.
 
 ```{r}
 # select the commands that actually convey relevant information
-gam_sampledViz <- getViz(results_gam$Models$Region_Reduced)
+gam_sampledViz <- getViz(result_gam$Models$Region_Reduced)
 print(plot(gam_sampledViz, allTerms = T), pages = 1)
 ```
 
